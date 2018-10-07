@@ -1,46 +1,11 @@
-#include <stdbool.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-int main(void) {
-    // Abertura do arquivo e mapeamento para variavel stream
-    FILE* stream = fopen("matriz_tabuleiro.txt", "r");
-
-    // Eh necessario testar o valor de 'stream' para certificar-se
-    // que a abertura teve sucesso
-    if (stream == 0) {
-        // Houve erro, imprime o que aconteceu
-        perror("Erro na abertura do arquivo");
-        return EXIT_FAILURE;
-    }
-    while (!feof(stream)) { // Enquanto NAO encontra o fim do arquivo...
-        /*
-        fscanf(stream, "%c", &caractere); // como o scanf, mas agora lendo
-                                          // de 'stream' ao inves do teclado
-        */
-        char caractere = fgetc(stream);
-        if (caractere == EOF) {
-            // EOF pode vir por:
-            // a) fim do arquivo mesmo;
-            // b) erro na leitura
-            // Pra diferenciar, usa a funcao que testa se houve erro em operacao
-            // de arquivo
-            if (ferror(stream)) {
-                perror("Erro na leitura do arquivo");
-                fclose(stream); // fecha o arquivo que estah aberto
-                return EXIT_FAILURE;
+int imprime_tabuleiro(void) {
+    char tabuleiro[36][26];
+    int i, j;
+    for (i = 0; i < 36; i++) {
+        for (j = 0; j < 26; j++) {
+            putchar(tabuleiro[i][j]);
             }
-        } else {
-            // Eh um caractere valido, imprime na tela
-            /*
-            printf("%c", caractere);
-            */
-            putchar(caractere); // funcao que imprime apenas um caractere (nao
-                                // imprime outros tipos, como int, float, ...)
         }
-    }
     printf("\n");
-    // Fechamento da stream, fim do acesso ao arquivo
-    fclose(stream);
     return EXIT_SUCCESS;
 }
