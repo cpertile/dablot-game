@@ -61,22 +61,8 @@
 
 	[Como Imprimir]
 	- Fazer a matriz de char[36,26]
-	- Colocar um a um os valores (for)
-	- Imprimir um a um os valores usando gotoxy(i,j) + printf(i,j)
-
-	[Código]
-	// Interseção vazia
-	const int vazio = 0
-
-	// Peças do Jogador 1
-	const int nivel11 = 11
-	const int nivel12 = 12
-	const int nivel13 = 13
-	
-	// Jogador 2
-	const int nivel21 = 21
-	const int nivel22 = 22
-	const int nivel23 = 23
+	- Ler o conteúdo do arquivo matriz_tabuleiro.txt
+	- Imprimir a matriz com um for normal
 
 // Peças
 	// Time Rei
