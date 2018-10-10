@@ -71,9 +71,9 @@
 		- Guerreiro [g] x 28
 
 	// Time Fazendeiro
-		- Fazendeiro (F) x 1 
-		- Filho (f) x 1
-		- Camponeses (c) x 28
+		- Fazendeiro [F] x 1 
+		- Filho [f] x 1
+		- Camponeses [c] x 28
 
 // Regras de movimento
 	- Uma peça só pode se movimentar para uma interseção vazia

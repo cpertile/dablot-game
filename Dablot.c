@@ -28,13 +28,14 @@ int imprime_menu(void) {
     // Imprime o menu inicial do jogo
     printf("Bem-vindo(a) ao jogo Dablot!\n");
     while (escolha != 'S') {
-        printf("Para INICIAR, digite I\nPara APRENDER A JOGAR, digite A\nPara sair, digite S\n");
+        printf("Digite 'I' para Iniciar\nPara APRENDER A JOGAR, digite 'A'\nPara sair, digite 'S'\n");
         escolha = getchar();
         escolha = toupper(escolha);
         if (escolha == 'I') {
             while ((escolha != 'N' || escolha != 'C')) {
             printf("Deseja um Novo Jogo (N) ou Carregar Jogo Salvo (C)?\n");
-            escolha = getchar();
+            //escolha = getchar();
+            scanf(" %c", &escolha);
             escolha = toupper(escolha);
                 if (escolha == 'N') {
                     // Iniciar novo jogo
@@ -44,6 +45,8 @@ int imprime_menu(void) {
                     return EXIT_SUCCESS;
                 } else if (escolha == 'C') {
                     // Carregar jogo salvo
+                    // Desenvolver funções de salvar o jogo e carregar o jogo salvo
+                    // Verificar, no começo dessa função, se existe o arquivo jogo_salvo.txt
                 }
             }
         } else if (escolha == 'A') {
@@ -119,4 +122,41 @@ int faz_jogada(void) {
     // Realiza a jogada propriamente dita
     // Precisa de variável para armazenar onde a peça estava (e colocar um espaço em branco)
     // Ao fim da função, mudar jogador_atual
-}*/
+}
+
+int salvar_jogo(void) {
+    // Salva a matriz do jogo no arquivo jogo_salvo.txt com a mesma estrutura do matriz_tabuleiro.txt
+}
+
+int carregar_jogo(void) {
+    // Carrega o jogo salvo (caso exista) da mesma forma que a função le_tabuleiro() carrega o jogo padrão
+    // Validar se o arquivo existe ou não
+    char caractere;
+    int i, j;
+
+    FILE* stream = fopen("jogo_salvo.txt", "r");
+    if (stream == 0) {
+        perror("Erro na abertura do arquivo");
+        return EXIT_FAILURE;
+    }
+    while (!feof(stream)) { 
+        for (i = 0; i < 37; ++i) {
+            for (j = 0; j < 26; ++j) {
+                caractere = fgetc(stream);
+                if (caractere == EOF) {
+                    if (ferror(stream)) {
+                        perror("Erro na leitura do arquivo");
+                        fclose(stream);
+                        return EXIT_FAILURE;
+                    }
+                } else {
+                    tabuleiro[i][j] = caractere;
+                }
+            }
+        }
+    }
+    // Fechamento da stream, fim do acesso ao arquivo
+    fclose(stream);
+    return EXIT_SUCCESS;
+}
+*/
