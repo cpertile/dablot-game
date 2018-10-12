@@ -1,162 +1,201 @@
+// Dablot v 0.2.2
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
-//#include "dablib.h" - fazer biblioteca funcionar
 
-int imprime_menu(void);
-int le_tabuleiro(void);
-int imprime_tabuleiro(void);
+#define TAM_X_TAB 11
+#define TAM_Y_TAB 13
+#define TAM_VETOR 30
 
-// Matriz declarada globalmente para que todas as funções tenham acesso
-char tabuleiro[37][26];
-
-// Variável que controla quem é o jogador da vez (1 ou 2)
-unsigned jogador_atual = 0;
+char menu_inicial(void);
+void inicializa_vetor_pecas(char[*], int);
+void inicializa_matriz_posicao(char[TAM_VETOR], char[TAM_VETOR], char[TAM_X_TAB][TAM_Y_TAB]);
+void imprime_tabuleiro(const char [*][TAM_Y_TAB]);
 
 int main(void) {
-    imprime_menu();
-	return EXIT_SUCCESS;
+    // Declaração de vetores peças
+    char pecas_jog1[30], pecas_jog2[30];
+    // Inicialização dos vetores peças (vetor, nº do jogador)
+    inicializa_vetor_pecas(pecas_jog1, 1);
+    inicializa_vetor_pecas(pecas_jog2, 2);
+
+    // Matriz de posições disponíveis para as peças
+    char matriz_posicao[TAM_X_TAB][TAM_Y_TAB];
+    // Colocando as peças na matriz de posições (vetor jogador 1, vetor jogador 2 e matriz posição)
+    inicializa_matriz_posicao(pecas_jog1, pecas_jog2, matriz_posicao);
+
+    // Chama o menu inicial. Retorna a escolha do jogador
+    switch(menu_inicial()) {
+        case 'N': imprime_tabuleiro(matriz_posicao); break;
+        case 'A': printf("Funcao APRENDA A JOGAR ainda nao desenvolvida...\n"); break;
+        case 'C': printf("Funcao CARREGAR JOGO SALVO ainda nao desenvolvida...\n"); break;
+        case 'S': printf("Saindo...\n"); break;
+    }
+    return EXIT_SUCCESS;
 }
 
-// Funções (incluir na biblioteca e tirar daqui)
-
-int imprime_menu(void) {
+char menu_inicial() {
     // Melhorar design dos printfs das escolhas
-    // Incluir __fpurge ou fflush antes dos getchar() para não repetir o printf dentro do while
     char escolha = 'E';
 
     // Imprime o menu inicial do jogo
     printf("Bem-vindo(a) ao jogo Dablot!\n");
     while (escolha != 'S') {
         printf("Digite 'I' para Iniciar\nPara APRENDER A JOGAR, digite 'A'\nPara sair, digite 'S'\n");
-        escolha = getchar();
+        scanf(" %c", &escolha);
         escolha = toupper(escolha);
         if (escolha == 'I') {
             while ((escolha != 'N' || escolha != 'C')) {
             printf("Deseja um Novo Jogo (N) ou Carregar Jogo Salvo (C)?\n");
-            //escolha = getchar();
             scanf(" %c", &escolha);
             escolha = toupper(escolha);
-                if (escolha == 'N') {
-                    // Iniciar novo jogo
-                    le_tabuleiro();
-                    imprime_tabuleiro();
-                    // Aqui deve vir a função pede_valida_jogada()?
-                    return EXIT_SUCCESS;
-                } else if (escolha == 'C') {
-                    // Carregar jogo salvo
-                    // Desenvolver funções de salvar o jogo e carregar o jogo salvo
-                    // Verificar, no começo dessa função, se existe o arquivo jogo_salvo.txt
-                }
+            return escolha;
             }
-        } else if (escolha == 'A') {
-            // Abrir tutorial
         }
+        return escolha;
     }
-    if (escolha == 'S') {
-        // Sair do jogo (colocar aqui função que desligue o terminal)
-        printf("Saindo...\n");
-    }
-    return EXIT_SUCCESS;
+    return escolha;
 }
 
-int le_tabuleiro(void) {
-    // Lê o tabuleiro padrão de início de jogo armazenado no arquivo matriz_tabuleiro.txt e grava na matriz global tabuleiro[][]
-	char caractere;
-    int i, j;
-
-	FILE* stream = fopen("matriz_tabuleiro.txt", "r");
-    if (stream == 0) {
-        perror("Erro na abertura do arquivo");
-        return EXIT_FAILURE;
+void inicializa_vetor_pecas(char V[], int jog) {
+    // Preenche o vetor passado com as peças correspondentes ao jogador 1 ou 2
+    int i;
+    if (jog == 1) {
+        for (i = 0; i < 30; ++i) {
+            if (i < 28) {
+                V[i] = 'g';
+            } else  if (i < 29) {
+                  V[i] = 'p';
+               } else {
+                    V[i] = 'R';
+            }
+        }
     }
-    while (!feof(stream)) { 
-        for (i = 0; i < 37; ++i) {
-            for (j = 0; j < 26; ++j) {
-            	caractere = fgetc(stream);
-                if (caractere == EOF) {
-                    if (ferror(stream)) {
-                        perror("Erro na leitura do arquivo");
-                        fclose(stream);
-                        return EXIT_FAILURE;
-                    }
+    if (jog == 2) {
+        for (i = 0; i < 30; ++i) {
+            if (i < 28) {
+                V[i] = 'c';
+            } else  if (i < 29) {
+                  V[i] = 'f';
+               } else {
+                    V[i] = 'F';
+            }
+        }
+    }
+}
+
+void inicializa_matriz_posicao(char V1[TAM_VETOR], char V2[TAM_VETOR], char pos[TAM_X_TAB][TAM_Y_TAB]) {
+    // Preenche as posições com as peças
+    // Linhas pares = colunas pares
+    // Linhas ímpares = colunas ímpares
+    int i = 0;
+    int j = 0;
+    int x, y;
+
+    // Para cada linha, da 0 até a 4
+    for (y = 0; y < 5; ++y) {
+        for (x = 0; x < TAM_X_TAB; x++) {
+            if (y % 2 == 0) {
+                if (x % 2 == 0) {
+                    pos[x][y] = V1[i];  // Se a linha for par e a coluna for par, coloque a peça do vetor na matriz
+                    i++;
                 } else {
-                	tabuleiro[i][j] = caractere;
+                    pos[x][y] = '0';      // Se a coluna for ímpar, recebe 0
+                }
+            } else {
+                if (x % 2 == 1) {       // Se a linha for ímpar e a coluna for ímpar, coloque a peça do vetor na matriz
+                    pos[x][y] = V1[i];
+                    i++;
+                } else {                // Se a coluna for par, recebe 0
+                    pos[x][y] = '0';
                 }
             }
         }
     }
-    // Fechamento da stream, fim do acesso ao arquivo
-    fclose(stream);
-    return EXIT_SUCCESS;
-}
 
-int imprime_tabuleiro(void) {
-    // Imprime o tabuleiro armezenado na matriz global tabuleiro[][]
-    int i, j;
-    system("clear");
-    for (i = 0; i < 37; ++i) {
-        for (j = 0; j < 26; ++j) {
-            putchar(tabuleiro[i][j]);
-            }
-        }
-    printf("\n");
-    return EXIT_SUCCESS;
-}
-/*
-int pede_valida_jogada(void) {
-    // Pede as coordenadas para o jogador da vez, valida se o jogador escolheu uma posição que possui uma peça e se essa peça é do seu próprio time
-    // se jogador_atual = 1 deve validar com as peças R, p e g.
-    // se jogador_atual = 2 deve validar com as peças F, f e c.
-    printf("Digite a coordenada alfabetica seguida da coordenada numeral (ex A10): ");
-    scanf();
-}
-
-int valida_jogada(int ?????) {
-    // Valida se o jogador escolheu um destino correto para sua peça
-    // se posição = vazio
-    // se posição = ocupada por inimigo && próxima posição = vazio
-}
-
-int faz_jogada(void) {
-    // Realiza a jogada propriamente dita
-    // Precisa de variável para armazenar onde a peça estava (e colocar um espaço em branco)
-    // Ao fim da função, mudar jogador_atual
-}
-
-int salvar_jogo(void) {
-    // Salva a matriz do jogo no arquivo jogo_salvo.txt com a mesma estrutura do matriz_tabuleiro.txt
-}
-
-int carregar_jogo(void) {
-    // Carrega o jogo salvo (caso exista) da mesma forma que a função le_tabuleiro() carrega o jogo padrão
-    // Validar se o arquivo existe ou não
-    char caractere;
-    int i, j;
-
-    FILE* stream = fopen("jogo_salvo.txt", "r");
-    if (stream == 0) {
-        perror("Erro na abertura do arquivo");
-        return EXIT_FAILURE;
-    }
-    while (!feof(stream)) { 
-        for (i = 0; i < 37; ++i) {
-            for (j = 0; j < 26; ++j) {
-                caractere = fgetc(stream);
-                if (caractere == EOF) {
-                    if (ferror(stream)) {
-                        perror("Erro na leitura do arquivo");
-                        fclose(stream);
-                        return EXIT_FAILURE;
-                    }
+    // Para cada linha, da 12 até a 8
+    for (y = 12; y > 7; --y) {
+        for (x = 0; x < TAM_X_TAB; x++) {
+            if (y % 2 == 0) {
+                if (x % 2 == 0) {
+                    pos[x][y] = V2[j];  // Se a linha for par e a coluna for par, coloque a peça do vetor na matriz
+                    j++;
                 } else {
-                    tabuleiro[i][j] = caractere;
+                    pos[x][y] = '0';      // Se a coluna for ímpar, recebe 0
+                }
+            } else {
+                if (x % 2 == 1) {       // Se a linha for ímpar e a coluna for ímpar, coloque a peça do vetor na matriz
+                    pos[x][y] = V2[j];
+                    j++;
+                } else {                // Se a coluna for par, recebe 0
+                    pos[x][y] = '0';
                 }
             }
         }
     }
-    // Fechamento da stream, fim do acesso ao arquivo
-    fclose(stream);
-    return EXIT_SUCCESS;
+
+    // Para a linha 5, se a coluna for par recebe 0
+    // Se a coluna for ímpar, se for 1 recebe V1[28], se for outro número recebe espaço (' ')
+    for (x = 0; x < TAM_X_TAB; x++) {
+        if (x % 2 == 0) {
+            pos[x][5] = '0';
+        } else {
+            if (x == 1) {
+                pos[x][5] = V1[28];
+            } else {
+                pos[x][5] = ' ';            
+            }
+        }
+    }
+
+    // Para a linha 6, se a coluna for ímpar, recebe 0
+    // Se a coluna for par e 0, coloque a peça V1[29] na posição pos[0][6], se for 10, a peça V2[29] na pos[10][6], e outro núm recebe espaço (' ')
+    for (x = 0; x < TAM_X_TAB; x++) {
+        if (x % 2 == 1) {
+            pos[x][6] = '0';
+        } else {
+            if (x == 0) {
+                pos[x][6] = V1[29];
+            } else if (x == 10) {
+                pos[x][6] = V2[29];
+            } else {
+                pos[x][6] = ' ';            
+            }
+        }
+    }
+    
+    // Para a linha 7, se a coluna for par recebe 0
+    // Se a coluna for ímpar, se for 9 recebe a peça V2[28], se não recebe espaço (' ')
+    for (x = 0; x < TAM_X_TAB; x++) {
+        if (x % 2 == 0) {
+            pos[x][7] = '0';
+        } else {
+            if (x == 9) {
+                pos[x][7] = V2[28];
+            } else {
+                pos[x][7] = ' ';
+            }
+        }
+    }
 }
-*/
+
+void imprime_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
+    // Imprime em tela o tabuleiro, sendo a matriz de posições + as strings da moldura
+    // Só usa a posição da matriz se ela não tiver um 0, ou seja, for válida
+    int x, y;
+    puts("    A  B  C  D  E  F  G  H  I  J  K ");
+    // Para as linhas pares, 
+    for (y = 0; y < TAM_Y_TAB; y++) {
+        for (x = 0; x < TAM_X_TAB; x++) {
+            if (T[x][y] != 0) {
+                putchar(T[x][y]);
+            }
+        }
+        putchar('\n');
+    }
+}
+
+/* void iniciar_jogo(void) {
+    while (!fim_jogo()) 
+}*/
