@@ -1,16 +1,19 @@
+// Dablot v 0.2.2
+
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 
 #define TAM_X_TAB 11
 #define TAM_Y_TAB 13
 #define TAM_VETOR 30
 
+char menu_inicial(void);
 void inicializa_vetor_pecas(char[*], int);
 void inicializa_matriz_posicao(char[TAM_VETOR], char[TAM_VETOR], char[TAM_X_TAB][TAM_Y_TAB]);
 void imprime_tabuleiro(const char [*][TAM_Y_TAB]);
 
 int main(void) {
-    printf("Dablot v0.2\n");
     // Declaração de vetores peças
     char pecas_jog1[30], pecas_jog2[30];
     // Inicialização dos vetores peças (vetor, nº do jogador)
@@ -22,9 +25,37 @@ int main(void) {
     // Colocando as peças na matriz de posições (vetor jogador 1, vetor jogador 2 e matriz posição)
     inicializa_matriz_posicao(pecas_jog1, pecas_jog2, matriz_posicao);
 
-    // Primeira impressão da matriz posição, sem o tabuleiro junto
-    imprime_tabuleiro(matriz_posicao);
+    // Chama o menu inicial. Retorna a escolha do jogador
+    switch(menu_inicial()) {
+        case 'N': imprime_tabuleiro(matriz_posicao); break;
+        case 'A': printf("Funcao APRENDA A JOGAR ainda nao desenvolvida...\n"); break;
+        case 'C': printf("Funcao CARREGAR JOGO SALVO ainda nao desenvolvida...\n"); break;
+        case 'S': printf("Saindo...\n"); break;
+    }
     return EXIT_SUCCESS;
+}
+
+char menu_inicial() {
+    // Melhorar design dos printfs das escolhas
+    char escolha = 'E';
+
+    // Imprime o menu inicial do jogo
+    printf("Bem-vindo(a) ao jogo Dablot!\n");
+    while (escolha != 'S') {
+        printf("Digite 'I' para Iniciar\nPara APRENDER A JOGAR, digite 'A'\nPara sair, digite 'S'\n");
+        scanf(" %c", &escolha);
+        escolha = toupper(escolha);
+        if (escolha == 'I') {
+            while ((escolha != 'N' || escolha != 'C')) {
+            printf("Deseja um Novo Jogo (N) ou Carregar Jogo Salvo (C)?\n");
+            scanf(" %c", &escolha);
+            escolha = toupper(escolha);
+            return escolha;
+            }
+        }
+        return escolha;
+    }
+    return escolha;
 }
 
 void inicializa_vetor_pecas(char V[], int jog) {
@@ -164,3 +195,7 @@ void imprime_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
         putchar('\n');
     }
 }
+
+/* void iniciar_jogo(void) {
+    while (!fim_jogo()) 
+}*/
