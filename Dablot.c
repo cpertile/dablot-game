@@ -28,29 +28,41 @@ int main(void) {
     // Chama o menu inicial. Retorna a escolha do jogador
     switch(menu_inicial()) {
         case 'N': imprime_tabuleiro(matriz_posicao); break;
-        case 'A': printf("Funcao APRENDA A JOGAR ainda nao desenvolvida...\n"); break;
-        case 'C': printf("Funcao CARREGAR JOGO SALVO ainda nao desenvolvida...\n"); break;
-        case 'S': printf("Saindo...\n"); break;
+        case 'A': puts("Funcao APRENDA A JOGAR ainda nao desenvolvida..."); break;
+        case 'C': puts("Funcao CARREGAR JOGO SALVO ainda nao desenvolvida..."); break;
+        case 'S': puts("Saindo..."); break;
+        default: puts("Opcao invalida...");
     }
     return EXIT_SUCCESS;
 }
 
 char menu_inicial() {
-    // Melhorar design dos printfs das escolhas
     char escolha = 'E';
 
-    // Imprime o menu inicial do jogo
-    printf("Bem-vindo(a) ao jogo Dablot!\n");
+    // Limpa a tela e imprime o menu inicial do jogo
+    system("clear");
+    putchar('\n');
+    puts("  ╔══════════════════════════════╗");
+    puts("  ║ Bem-vindo(a) ao jogo Dablot! ║");
+    puts("  ╚══════════════════════════════╝");
+    putchar('\n');
     while (escolha != 'S') {
-        printf("Digite 'I' para Iniciar\nPara APRENDER A JOGAR, digite 'A'\nPara sair, digite 'S'\n");
+        puts("╔══════════════════════════════════╗");
+        puts("║ Digite (A) para Aprender a jogar ║");
+        puts("║      Digite (I) para Iniciar     ║");
+        puts("║       Digite (S) para Sair       ║");
+        puts("╚══════════════════════════════════╝");
+        putchar('\n');
         scanf(" %c", &escolha);
         escolha = toupper(escolha);
         if (escolha == 'I') {
             while ((escolha != 'N' || escolha != 'C')) {
-            printf("Deseja um Novo Jogo (N) ou Carregar Jogo Salvo (C)?\n");
-            scanf(" %c", &escolha);
-            escolha = toupper(escolha);
-            return escolha;
+                puts("╔═════════════════════════════════════════════════════╗");
+                puts("║ Deseja um Novo Jogo (N) ou Carregar Jogo Salvo (C)? ║");
+                puts("╚═════════════════════════════════════════════════════╝");
+                scanf(" %c", &escolha);
+                escolha = toupper(escolha);
+                return escolha;
             }
         }
         return escolha;
@@ -185,7 +197,8 @@ void imprime_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
     // Se T[x][y] != '0', putchar. Se == '0', printf("string");
     int x, y;
     
-    // Cabeçalho
+    // Limpa a tela e printa o cabeçalho
+    system("clear");
     puts("     A  B  C  D  E  F  G  H  I  J  K ");
     
     // Para cada linha, se o índice da linha for par ou ímpar, acontece algo diferente
