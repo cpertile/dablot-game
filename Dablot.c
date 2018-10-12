@@ -182,17 +182,49 @@ void inicializa_matriz_posicao(char V1[TAM_VETOR], char V2[TAM_VETOR], char pos[
 
 void imprime_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
     // Imprime em tela o tabuleiro, sendo a matriz de posições + as strings da moldura
-    // Só usa a posição da matriz se ela não tiver um 0, ou seja, for válida
+    // Se T[x][y] != '0', putchar. Se == '0', printf("string");
     int x, y;
-    puts("    A  B  C  D  E  F  G  H  I  J  K ");
-    // Para as linhas pares, 
+    
+    // Cabeçalho
+    puts("     A  B  C  D  E  F  G  H  I  J  K ");
+    
+    // Para cada linha, se o índice da linha for par ou ímpar, acontece algo diferente
     for (y = 0; y < TAM_Y_TAB; y++) {
-        for (x = 0; x < TAM_X_TAB; x++) {
-            if (T[x][y] != 0) {
-                putchar(T[x][y]);
+        if (y % 2 == 0) {
+            // Linha índice par (y = 0, linha = 1)
+            if (y < 10) {
+                printf(" %d  [", y+1);
+            } else {
+                printf(" %d [", y+1);
             }
+            for (x = 0; x < TAM_X_TAB; x++) {
+                if (T[x][y] != '0') {
+                    putchar(T[x][y]);
+                } else {
+                    printf("]---[");
+                }
+            }
+            puts("]");
+            if (y < 12) {
+                puts("     | \\ / | \\ / | \\ / | \\ / | \\ / | ");
+            }
+        } else {
+            // Linha índice ímpar (y = 1, linha = 2)
+            if (y < 9) {
+                printf(" %d   | [", y+1);                
+            } else {
+                printf(" %d  | [", y+1);                
+            }
+            for (x = 1; x < TAM_X_TAB-1; x++) {
+                if (T[x][y] != '0') {
+                    putchar(T[x][y]);
+                } else {
+                    printf("] | [");
+                }
+            }
+            puts("] | ");
+            puts("     | / \\ | / \\ | / \\ | / \\ | / \\ | ");
         }
-        putchar('\n');
     }
 }
 
