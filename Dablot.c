@@ -7,11 +7,16 @@
 #define TAM_X_TAB 11
 #define TAM_Y_TAB 13
 #define TAM_VETOR 30
+#define LIM_SUPERIOR 0
+#define LIM_INFERIOR 12
+#define LIM_ESQUERDO 0
+#define LIM_DIREITO 10
 
 char menu_inicial(void);
 void inicializa_vetor_pecas(char[*], int);
 void inicializa_matriz_posicao(char[TAM_VETOR], char[TAM_VETOR], char[TAM_X_TAB][TAM_Y_TAB]);
-void imprime_tabuleiro(const char [*][TAM_Y_TAB]);
+void imprime_tabuleiro(const char [TAM_X_TAB][TAM_Y_TAB]);
+int pede_valida_jogada(char [TAM_X_TAB][TAM_Y_TAB], int, char [*], char [*]);
 
 int main(void) {
     // Declaração de vetores peças
@@ -27,12 +32,25 @@ int main(void) {
 
     // Chama o menu inicial. Retorna a escolha do jogador
     switch(menu_inicial()) {
-        case 'N': imprime_tabuleiro(matriz_posicao); break;
+        case 'N':
+            puts("Começando um novo jogo!");
+            puts("Primeiro vamos conhecer os jogadores...");
+            char nome_jogador1[20], nome_jogador2[20];
+            puts("Qual o nome do jogador 1, que vai comandar o [R]ei, o [p]ríncipe e os [g]uerreiros?");
+            scanf("%s", nome_jogador1);
+            puts("E o jogador 2, que vai comandar o [F]azendeiro, seu [f]ilho e os [c]amponeses?");
+            scanf("%s", nome_jogador2);
+            imprime_tabuleiro(matriz_posicao);
+
+            // Quando o sorteio de quem começa estiver pronto, colocar no lugar do 1 abaixo
+            pede_valida_jogada(matriz_posicao, 1, nome_jogador1, nome_jogador2);
+            break;
         case 'A': puts("Funcao APRENDA A JOGAR ainda nao desenvolvida..."); break;
         case 'C': puts("Funcao CARREGAR JOGO SALVO ainda nao desenvolvida..."); break;
         case 'S': puts("Saindo..."); break;
         default: puts("Opcao invalida...");
     }
+
     return EXIT_SUCCESS;
 }
 
@@ -205,11 +223,13 @@ void imprime_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
     for (y = 0; y < TAM_Y_TAB; y++) {
         if (y % 2 == 0) {
             // Linha índice par (y = 0, linha = 1)
+            // Imprime as coordenadas numerais da borda esquerda
             if (y < 10) {
                 printf(" %d  [", y+1);
             } else {
                 printf(" %d [", y+1);
             }
+            // Imprime ou uma peça ou um separador
             for (x = 0; x < TAM_X_TAB; x++) {
                 if (T[x][y] != '0') {
                     putchar(T[x][y]);
@@ -241,6 +261,232 @@ void imprime_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
     }
 }
 
-/* void iniciar_jogo(void) {
-    while (!fim_jogo()) 
-}*/
+int pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int jog_atual, char J1[], char J2[]) {
+    // coord_x - l = letra, n = número)
+    char coord_x_l;
+    int coord_x_n, coord_y;
+    // Variáveis de controle do while. peca_valida = se a pessoa escolheu uma peça dela que pode se mover, jog_valida = se escolheu um destino válido
+    int peca_valida = 0;
+    int jog_valida = 0;
+
+    // Enquanto a peca escolhida e o destino nao forem validos, solicita novamente para o jogador
+    while ((peca_valida != 1) && (jog_valida != 1)) {
+        // Pede as coordenadas, troca por algo que a matriz entende e valida
+        if (jog_atual == 1) {
+            printf("%s, sua vez!\n", J1);
+        } else {
+            printf("%s, sua vez!\n", J2);
+        }
+        printf("Digite a coordenada alfabética (eixo X) da peça que você quer mover: ");
+        scanf(" %c", &coord_x_l);
+        coord_x_l = toupper(coord_x_l);
+        switch(coord_x_l) {
+            case 'A': coord_x_n = 0; break;
+            case 'B': coord_x_n = 1; break;
+            case 'C': coord_x_n = 2; break;
+            case 'D': coord_x_n = 3; break;
+            case 'E': coord_x_n = 4; break;
+            case 'F': coord_x_n = 5; break;
+            case 'G': coord_x_n = 6; break;
+            case 'H': coord_x_n = 7; break;
+            case 'I': coord_x_n = 8; break;
+            case 'J': coord_x_n = 9; break;
+            case 'K': coord_x_n = 10; break;
+            default: coord_x_n = 11;
+        }
+        printf("Digite a coordenada numérica (eixo Y) da peça que você quer mover: ");
+        scanf("%d", &coord_y);
+        coord_y -= 1;
+
+        // Verificar se jogador não digitou uma combinação inválida tipo A2
+        // Ou se digitou algo fora da matriz de posição do tabuleiro
+        // Princípio Coluna par Linha par / Coluna ímpar linha ímpar
+        if ((coord_x_n >= LIM_ESQUERDO) && (coord_x_n <= LIM_DIREITO) && (coord_y >= LIM_SUPERIOR) && (coord_y <= LIM_INFERIOR)) {
+            if (coord_x_n % 2 == 0) {
+                if (coord_y % 2 == 0) {
+                    peca_valida = 1;
+                } else {
+                    peca_valida = 0;
+                    puts("Voce escolheu uma combinacao invalida, tente novamente...");
+                    continue;
+                }
+            } else {
+                if (coord_y % 2 == 1) {
+                    peca_valida = 1;
+                } else {
+                    peca_valida = 0;
+                    puts("Voce escolheu uma combinacao invalida, tente novamente...");
+                    continue;
+                }
+            }
+        } else {
+            peca_valida = 0;
+            puts("Voce escolheu uma combinacao invalida, tente novamente...");
+            continue;
+        }
+
+        // Verifica as peças { R, p, g } ou { F, f, c } dependendo se é o jogador 1 ou 2
+        // Se tiver um espaço, pede outra coordenada
+        if (peca_valida == 1) {
+            if (jog_atual == 1) {
+                if ((pos[coord_x_n][coord_y] == 'R') || (pos[coord_x_n][coord_y] == 'p') || (pos[coord_x_n][coord_y] == 'g')) {
+                    peca_valida = 1;
+                } else if (pos[coord_x_n][coord_y] == ' ') {
+                    peca_valida = 0;
+                    printf("Esse espaco estah vazio...\n");
+                    continue;
+                } else {
+                    peca_valida = 0;
+                    printf("Voce escolheu uma peca do adversario...\n");
+                    continue;
+                }
+            } else if (jog_atual == 2) {
+                if ((pos[coord_x_n][coord_y] == 'F') || (pos[coord_x_n][coord_y] == 'f') || (pos[coord_x_n][coord_y] == 'c')) {
+                    peca_valida = 1;
+                } else if (pos[coord_x_n][coord_y] == ' ') {
+                    peca_valida = 0;
+                    printf("Esse espaco estah vazio...\n");
+                    continue;
+                } else {
+                    peca_valida = 0;
+                    printf("Voce escolheu uma peca do adversario...\n");
+                    continue;
+                }
+            }
+            // Pesquisando a matriz em volta da peça, se todas as posições tiverem uma letra, a peça está sem movimentos
+            // Na diagonal (variando eixo x e y ao mesmo tempo), apenas uma casa 
+            // Pedir pro jogador escolher outra peça caso não encontre nenhum ' '
+            // Se o resultado da pesquisa achar pelo um ' ', a jogada é válida.
+            // As peças próximas às bordas precisam de validação diferente para não sair da matriz
+
+            // Conjunto de coordenadas cardeais
+            const int x = 0, y = 1;
+            int N[2] = { coord_x_n, (coord_y - 2) };
+            int S[2] = { coord_x_n, (coord_y + 2) };
+            int E[2] = { (coord_x_n + 2), coord_y };
+            int O[2] = { (coord_x_n - 2), coord_y };
+            int NE[2] = { (coord_x_n + 1), (coord_y - 1) };
+            int SE[2] = { (coord_x_n + 1), (coord_y + 1) };
+            int SO[2] = { (coord_x_n - 1), (coord_y + 1) };
+            int NO[2] = { (coord_x_n - 1), (coord_y - 1) };
+
+            // Verifica em cada coordenada cardeal se está dentro do tabuleiro e se tem espaço disponível
+            // Linhas de índice par = todas as coordenadas
+            // Linhas de índice ímpar = apenas as coordenadas subcardeais NE, SE, SO e NO
+            if (coord_x_n % 2 == 0) {
+                if ((N[y] >= LIM_SUPERIOR) && (pos[N[x]][N[y]] == ' ')) {
+                    peca_valida = 1;
+                } else if ((S[y] <= LIM_INFERIOR) && (pos[S[x]][S[y]] == ' ')) {
+                    peca_valida = 1;
+                } else if ((E[x] <= LIM_DIREITO) && (pos[E[x]][E[y]] == ' ')) {
+                    peca_valida = 1;
+                } else if ((O[x] >= LIM_ESQUERDO) && (pos[O[x]][O[y]] == ' ')) {
+                    peca_valida = 1;
+                } else if ((NE[x] <= LIM_DIREITO) && (NE[y] >= LIM_SUPERIOR) && (pos[NE[x]][NE[y]] == ' ')) {
+                    peca_valida = 1;
+                } else if ((SE[x] <= LIM_DIREITO) && (SE[y] <= LIM_INFERIOR) && (pos[SE[x]][SE[y]] == ' ')) {
+                    peca_valida = 1;
+                } else if ((SO[x] >= LIM_ESQUERDO) && (SO[y] <= LIM_INFERIOR) && (pos[SO[x]][SO[y]] == ' ')) {
+                    peca_valida = 1;
+                } else if ((NO[x] >= LIM_ESQUERDO) && (NO[y] >= LIM_SUPERIOR) && (pos[NO[x]][NO[y]] == ' ')) {
+                    peca_valida = 1;
+                } else {
+                    peca_valida = 0;
+                    puts("Essa peca nao pode se mover, tente outra...");
+                    continue;
+                }
+            } else {
+                if ((NE[x] <= LIM_DIREITO) && (NE[y] >= LIM_SUPERIOR) && (pos[NE[x]][NE[y]] == ' ')) {
+                    peca_valida = 1;
+                } else if ((SE[x] <= LIM_DIREITO) && (SE[y] <= LIM_INFERIOR) && (pos[SE[x]][SE[y]] == ' ')) {
+                    peca_valida = 1;
+                } else if ((SO[x] >= LIM_ESQUERDO) && (SO[y] <= LIM_INFERIOR) && (pos[SO[x]][SO[y]] == ' ')) {
+                    peca_valida = 1;
+                } else if ((NO[x] >= LIM_ESQUERDO) && (NO[y] >= LIM_SUPERIOR) && (pos[NO[x]][NO[y]] == ' ')) {
+                    peca_valida = 1;
+                } else {
+                    peca_valida = 0;
+                    puts("Essa peca nao pode se mover, tente outra...");
+                    continue;
+                }
+            }
+
+            // Pede as coordenadas de destino para o jogador
+            char coord_x_l_dest;
+            int coord_x_n_dest, coord_y_dest;
+
+            printf("Para qual coordenada alfabética (eixo X) você quer move-la? ");
+            scanf(" %c", &coord_x_l_dest);
+            coord_x_l_dest = toupper(coord_x_l_dest);
+            switch(coord_x_l_dest) {
+                case 'A': coord_x_n_dest = 0; break;
+                case 'B': coord_x_n_dest = 1; break;
+                case 'C': coord_x_n_dest = 2; break;
+                case 'D': coord_x_n_dest = 3; break;
+                case 'E': coord_x_n_dest = 4; break;
+                case 'F': coord_x_n_dest = 5; break;
+                case 'G': coord_x_n_dest = 6; break;
+                case 'H': coord_x_n_dest = 7; break;
+                case 'I': coord_x_n_dest = 8; break;
+                case 'J': coord_x_n_dest = 9; break;
+                case 'K': coord_x_n_dest = 10; break;
+                default: coord_x_n_dest = 11;
+            }
+            printf("Para qual coordenada numérica (eixo Y) você quer move-la? ");
+            scanf("%d", &coord_y_dest);
+            coord_y_dest -= 1;
+
+            // Verificando se as coordenadas de destino estão dentro do tabuleiro
+
+            if ((coord_x_n_dest >= LIM_ESQUERDO) && (coord_x_n_dest <= LIM_DIREITO) && (coord_y_dest >= LIM_SUPERIOR) && (coord_y_dest <= LIM_INFERIOR)) {
+                if (coord_x_n_dest % 2 == 0) {
+                    if (coord_y_dest % 2 == 0) {
+                        jog_valida = 1;
+                    } else {
+                        jog_valida = 0;
+                        puts("Voce escolheu um destino invalido, tente novamente...");
+                    }
+                } else {
+                    if (coord_y_dest % 2 == 1) {
+                        jog_valida = 1;
+                    } else {
+                        jog_valida = 0;
+                        puts("Voce escolheu um destino invalido, tente novamente...");
+                        continue;
+                    }
+                }
+            } else {
+                jog_valida = 0;
+                puts("Voce escolheu um destino invalido, tente novamente...");
+                continue;
+            }
+
+            // Verifica se as coordenadas de destino estão no alcance da peça
+            if (jog_valida == 1) {
+                if (((coord_x_n_dest == N[x]) || (coord_x_n_dest == S[x]) || (coord_x_n_dest == E[x]) || (coord_x_n_dest == O[x]) 
+                    || (coord_x_n_dest == NE[x]) || (coord_x_n_dest == SE[x]) || (coord_x_n_dest == SO[x]) || (coord_x_n_dest == NE[x]))
+                    && ((coord_y_dest == N[y]) || (coord_y_dest == S[y]) || (coord_y_dest == E[y]) || (coord_y_dest == O[y]) 
+                    || (coord_y_dest == NE[y]) || (coord_y_dest == SE[y]) || (coord_y_dest == SO[y]) || (coord_y_dest == NE[y]))) {
+                    jog_valida = 1;
+                } else {
+                    jog_valida = 0;
+                    puts("Essa coordenada estah fora do alcance da sua peca...");
+                    continue;
+                }
+            }
+            
+            // Verificando se nessa coordenada tem um espaço
+            if (jog_valida == 1) {
+                if (pos[coord_x_n_dest][coord_y_dest] == ' '){
+                    jog_valida = 1;
+                    puts("Casa disponivel!");
+                } else {
+                    jog_valida = 0;
+                    puts("Essa casa nao esta disponivel, tente outra...");
+                    continue;
+                }
+            }
+        }
+    }   
+    return 0;
+}
