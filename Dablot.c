@@ -15,8 +15,9 @@
 char menu_inicial(void);
 void inicializa_vetor_pecas(char[*], int);
 void inicializa_matriz_posicao(char[TAM_VETOR], char[TAM_VETOR], char[TAM_X_TAB][TAM_Y_TAB]);
-void imprime_tabuleiro(const char [TAM_X_TAB][TAM_Y_TAB]);
-int pede_valida_jogada(char [TAM_X_TAB][TAM_Y_TAB], int, char [*], char [*]);
+void imprime_tabuleiro(const char[TAM_X_TAB][TAM_Y_TAB]);
+int pede_valida_jogada(char[TAM_X_TAB][TAM_Y_TAB], int, char[*], char[*]);
+int faz_jogada(char[TAM_X_TAB][TAM_Y_TAB], int[*], int[*]);
 
 int main(void) {
     // Declaração de vetores peças
@@ -42,8 +43,18 @@ int main(void) {
             scanf("%s", nome_jogador2);
             imprime_tabuleiro(matriz_posicao);
 
-            // Quando o sorteio de quem começa estiver pronto, colocar no lugar do 1 abaixo
-            pede_valida_jogada(matriz_posicao, 1, nome_jogador1, nome_jogador2);
+            // Vai repetir até o que o jogador informe uma jogada válida
+            int fazer_jogada = 0;
+            while (fazer_jogada == 0) {
+                // Quando o sorteio de quem começa estiver pronto, colocar no lugar do 1 abaixo
+                fazer_jogada = pede_valida_jogada(matriz_posicao, 1, nome_jogador1, nome_jogador2);
+            }
+
+            if (fazer_jogada) {
+                puts("A jogada será realizada...");
+
+            }
+
             break;
         case 'A': puts("Funcao APRENDA A JOGAR ainda nao desenvolvida..."); break;
         case 'C': puts("Funcao CARREGAR JOGO SALVO ainda nao desenvolvida..."); break;
@@ -262,6 +273,9 @@ void imprime_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
 }
 
 int pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int jog_atual, char J1[], char J2[]) {
+    
+    // *** CRIAR VETOR PECA[X][Y] E DEST[X][Y] E SUBSTITUIR TUDO NA FUNÇÃO ***
+
     // coord_x - l = letra, n = número)
     char coord_x_l;
     int coord_x_n, coord_y;
@@ -479,14 +493,29 @@ int pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int jog_atual, char J1[],
             if (jog_valida == 1) {
                 if (pos[coord_x_n_dest][coord_y_dest] == ' '){
                     jog_valida = 1;
-                    puts("Casa disponivel!");
+                    int peca[2], dest[2];
+                    peca[0] = coord_x_n;
+                    peca[1] = coord_y;
+                    dest[0] = coord_x_n_dest;
+                    dest[1] = coord_y_dest;
+                    faz_jogada(pos, peca, dest);
+                    return jog_valida;
                 } else {
                     jog_valida = 0;
                     puts("Essa casa nao esta disponivel, tente outra...");
-                    continue;
+                    return jog_valida;
                 }
             }
         }
     }   
+    return 0;
+}
+
+int faz_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int coord_peca[2], int coord_destino[2]) {
+    int x = 0, y = 1;
+    char tmp_move_peca = pos[coord_destino[x]][coord_destino[y]];
+    pos[coord_destino[x]][coord_destino[y]] = pos[coord_peca[x]][coord_peca[y]];
+    pos[coord_peca[x]][coord_peca[y]] = tmp_move_peca;
+    imprime_tabuleiro(pos);
     return 0;
 }
