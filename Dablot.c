@@ -52,7 +52,6 @@ int main(void) {
 
             if (fazer_jogada) {
                 puts("A jogada será realizada...");
-
             }
 
             break;
@@ -273,12 +272,12 @@ void imprime_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
 }
 
 int pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int jog_atual, char J1[], char J2[]) {
-    
-    // *** CRIAR VETOR PECA[X][Y] E DEST[X][Y] E SUBSTITUIR TUDO NA FUNÇÃO ***
-
-    // coord_x - l = letra, n = número)
+    // coord_x_l = coordenada na forma letra, depois traduzida para forma número
+    // x e y apenas para facilitar a escrita
     char coord_x_l;
     int coord_x_n, coord_y;
+    int x = 0, y = 1;
+    
     // Variáveis de controle do while. peca_valida = se a pessoa escolheu uma peça dela que pode se mover, jog_valida = se escolheu um destino válido
     int peca_valida = 0;
     int jog_valida = 0;
@@ -312,12 +311,15 @@ int pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int jog_atual, char J1[],
         scanf("%d", &coord_y);
         coord_y -= 1;
 
+        // Criado vetor para guardar as coordenadas da peça escolhida
+        int peca[2] = { coord_x_n, coord_y };
+
         // Verificar se jogador não digitou uma combinação inválida tipo A2
         // Ou se digitou algo fora da matriz de posição do tabuleiro
         // Princípio Coluna par Linha par / Coluna ímpar linha ímpar
-        if ((coord_x_n >= LIM_ESQUERDO) && (coord_x_n <= LIM_DIREITO) && (coord_y >= LIM_SUPERIOR) && (coord_y <= LIM_INFERIOR)) {
-            if (coord_x_n % 2 == 0) {
-                if (coord_y % 2 == 0) {
+        if ((peca[x] >= LIM_ESQUERDO) && (peca[x] <= LIM_DIREITO) && (peca[y] >= LIM_SUPERIOR) && (peca[y] <= LIM_INFERIOR)) {
+            if (peca[x] % 2 == 0) {
+                if (peca[y] % 2 == 0) {
                     peca_valida = 1;
                 } else {
                     peca_valida = 0;
@@ -343,9 +345,9 @@ int pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int jog_atual, char J1[],
         // Se tiver um espaço, pede outra coordenada
         if (peca_valida == 1) {
             if (jog_atual == 1) {
-                if ((pos[coord_x_n][coord_y] == 'R') || (pos[coord_x_n][coord_y] == 'p') || (pos[coord_x_n][coord_y] == 'g')) {
+                if ((pos[peca[x]][peca[y]] == 'R') || (pos[peca[x]][peca[y]] == 'p') || (pos[peca[x]][peca[y]] == 'g')) {
                     peca_valida = 1;
-                } else if (pos[coord_x_n][coord_y] == ' ') {
+                } else if (pos[peca[x]][peca[y]] == ' ') {
                     peca_valida = 0;
                     printf("Esse espaco estah vazio...\n");
                     continue;
@@ -355,9 +357,9 @@ int pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int jog_atual, char J1[],
                     continue;
                 }
             } else if (jog_atual == 2) {
-                if ((pos[coord_x_n][coord_y] == 'F') || (pos[coord_x_n][coord_y] == 'f') || (pos[coord_x_n][coord_y] == 'c')) {
+                if ((pos[peca[x]][peca[y]] == 'F') || (pos[peca[x]][peca[y]] == 'f') || (pos[peca[x]][peca[y]] == 'c')) {
                     peca_valida = 1;
-                } else if (pos[coord_x_n][coord_y] == ' ') {
+                } else if (pos[peca[x]][peca[y]] == ' ') {
                     peca_valida = 0;
                     printf("Esse espaco estah vazio...\n");
                     continue;
@@ -450,18 +452,21 @@ int pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int jog_atual, char J1[],
             scanf("%d", &coord_y_dest);
             coord_y_dest -= 1;
 
-            // Verificando se as coordenadas de destino estão dentro do tabuleiro
+            // Vetor com as coordenadas de destino
+            int dest[2] = { coord_x_n_dest, coord_y_dest };
 
-            if ((coord_x_n_dest >= LIM_ESQUERDO) && (coord_x_n_dest <= LIM_DIREITO) && (coord_y_dest >= LIM_SUPERIOR) && (coord_y_dest <= LIM_INFERIOR)) {
-                if (coord_x_n_dest % 2 == 0) {
-                    if (coord_y_dest % 2 == 0) {
+            // Verificando se as coordenadas de destino estão dentro do tabuleiro
+            // Usa também a validação linha-coluna par, linha-coluna ímpar
+            if ((dest[x] >= LIM_ESQUERDO) && (dest[x] <= LIM_DIREITO) && (dest[y] >= LIM_SUPERIOR) && (dest[y] <= LIM_INFERIOR)) {
+                if (dest[x] % 2 == 0) {
+                    if (dest[y] % 2 == 0) {
                         jog_valida = 1;
                     } else {
                         jog_valida = 0;
                         puts("Voce escolheu um destino invalido, tente novamente...");
                     }
                 } else {
-                    if (coord_y_dest % 2 == 1) {
+                    if (dest[y] % 2 == 1) {
                         jog_valida = 1;
                     } else {
                         jog_valida = 0;
@@ -476,29 +481,36 @@ int pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int jog_atual, char J1[],
             }
 
             // Verifica se as coordenadas de destino estão no alcance da peça
+
+            // *** Variável que armazena a direção do movimento ***
             if (jog_valida == 1) {
-                if (((coord_x_n_dest == N[x]) || (coord_x_n_dest == S[x]) || (coord_x_n_dest == E[x]) || (coord_x_n_dest == O[x]) 
-                    || (coord_x_n_dest == NE[x]) || (coord_x_n_dest == SE[x]) || (coord_x_n_dest == SO[x]) || (coord_x_n_dest == NE[x]))
-                    && ((coord_y_dest == N[y]) || (coord_y_dest == S[y]) || (coord_y_dest == E[y]) || (coord_y_dest == O[y]) 
-                    || (coord_y_dest == NE[y]) || (coord_y_dest == SE[y]) || (coord_y_dest == SO[y]) || (coord_y_dest == NE[y]))) {
-                    jog_valida = 1;
+                if (peca[y] % 2 == 0) {
+                    if (((dest[x] == N[x]) && (dest[y] == N[y])) || ((dest[x] == S[x]) && (dest[y] == S[y])) || 
+                        ((dest[x] == E[x]) && (dest[y] == E[y])) || ((dest[x] == O[x]) && (dest[y] == O[y])) || 
+                        ((dest[x] == NE[x]) && (dest[y] == NE[y])) || ((dest[x] == SE[x]) && (dest[y] == SE[y])) || 
+                        ((dest[x] == SO[x]) && (dest[y] == SO[y])) || ((dest[x] == NO[x]) && (dest[y] == NO[y]))) {
+                        jog_valida = 1;
+                    } else {
+                        jog_valida = 0;
+                        puts("Essa coordenada estah fora do alcance da sua peca...");
+                        continue;
+                    }
                 } else {
-                    jog_valida = 0;
-                    puts("Essa coordenada estah fora do alcance da sua peca...");
-                    continue;
+                    if (((dest[x] == NE[x]) && (dest[y] == NE[y])) || ((dest[x] == SE[x]) && (dest[y] == SE[y])) || 
+                        ((dest[x] == SO[x]) && (dest[y] == SO[y])) || ((dest[x] == NO[x]) && (dest[y] == NO[y]))) {
+                        jog_valida = 1;
+                    } else {
+                        jog_valida = 0;
+                        puts("Essa coordenada estah fora do alcance da sua peca...");
+                        continue;
+                    }
                 }
             }
             
-            // Verificando se nessa coordenada tem um espaço
+            // Verificando se nessa coordenada tem um espaço ou peça do oponente
             if (jog_valida == 1) {
-                if (pos[coord_x_n_dest][coord_y_dest] == ' '){
-                    jog_valida = 1;
-                    int peca[2], dest[2];
-                    peca[0] = coord_x_n;
-                    peca[1] = coord_y;
-                    dest[0] = coord_x_n_dest;
-                    dest[1] = coord_y_dest;
-                    faz_jogada(pos, peca, dest);
+                if (pos[dest[x]][dest[y]] == ' '){
+                    jog_valida = faz_jogada(pos, peca, dest);
                     return jog_valida;
                 } else {
                     jog_valida = 0;
@@ -517,5 +529,5 @@ int faz_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int coord_peca[2], int coord_dest
     pos[coord_destino[x]][coord_destino[y]] = pos[coord_peca[x]][coord_peca[y]];
     pos[coord_peca[x]][coord_peca[y]] = tmp_move_peca;
     imprime_tabuleiro(pos);
-    return 0;
+    return 1;
 }
