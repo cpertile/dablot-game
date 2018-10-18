@@ -49,7 +49,6 @@ int main(void) {
             while (game) {
                 imprime_tabuleiro(matriz_posicao);
                 pede_valida_jogada(matriz_posicao, &jog_atual, nome_jogador1, nome_jogador2);
-                troca_turno(&jog_atual);
             }
             /*
             // Vai repetir até o que o jogador informe uma jogada válida
@@ -301,7 +300,7 @@ int pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int *jog_atual, char NJ1[
     int jog_valida = 0;
 
     // Enquanto a peca escolhida e o destino nao forem validos, solicita novamente para o jogador
-    while ((peca_valida != 1) && (jog_valida != 1)) {
+    while ((peca_valida == 0) || (jog_valida == 0)) {
         // Pede as coordenadas, troca por algo que a matriz entende e valida
         if (*jog_atual == 1) {
             printf("%s, sua vez!\n", NJ1);
@@ -499,8 +498,6 @@ int pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int *jog_atual, char NJ1[
             }
 
             // Verifica se as coordenadas de destino estão no alcance da peça
-
-            // *** Variável que armazena a direção do movimento ***
             if (jog_valida == 1) {
                 if (peca[y] % 2 == 0) {
                     if (((dest[x] == N[x]) && (dest[y] == N[y])) || ((dest[x] == S[x]) && (dest[y] == S[y])) || 
@@ -529,11 +526,12 @@ int pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int *jog_atual, char NJ1[
             if (jog_valida == 1) {
                 if (pos[dest[x]][dest[y]] == ' '){
                     jog_valida = faz_jogada(pos, peca, dest);
+                    troca_turno(jog_atual);
                     return jog_valida;
                 } else {
                     jog_valida = 0;
                     puts("Essa casa nao esta disponivel, tente outra...");
-                    return jog_valida;
+                    continue;
                 }
             }
         }
