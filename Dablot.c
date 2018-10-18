@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 #define TAM_X_TAB 11
 #define TAM_Y_TAB 13
@@ -15,11 +16,20 @@
 char menu_inicial(void);
 void inicializa_vetor_pecas(char[*], int);
 void inicializa_matriz_posicao(char[TAM_VETOR], char[TAM_VETOR], char[TAM_X_TAB][TAM_Y_TAB]);
+void comeca_jogo(int *, char[*], char[*], bool *);
 void imprime_tabuleiro(const char[TAM_X_TAB][TAM_Y_TAB]);
-int pede_valida_jogada(char[TAM_X_TAB][TAM_Y_TAB], int, char[*], char[*]);
+int pede_valida_jogada(char[TAM_X_TAB][TAM_Y_TAB], int *, char[*], char[*]);
 int faz_jogada(char[TAM_X_TAB][TAM_Y_TAB], int[*], int[*]);
+void troca_turno(int *);
 
 int main(void) {
+    // Variáveis de controle gerais
+    bool game = false;
+
+    // Quando o sorteio de quem começa estiver pronto, colocar no lugar do 1 abaixo
+    int jog_atual = 1;
+    char nome_jogador1[20], nome_jogador2[20];
+
     // Declaração de vetores peças
     char pecas_jog1[30], pecas_jog2[30];
     // Inicialização dos vetores peças (vetor, nº do jogador)
@@ -31,29 +41,27 @@ int main(void) {
     // Colocando as peças na matriz de posições (vetor jogador 1, vetor jogador 2 e matriz posição)
     inicializa_matriz_posicao(pecas_jog1, pecas_jog2, matriz_posicao);
 
+
     // Chama o menu inicial. Retorna a escolha do jogador
     switch(menu_inicial()) {
         case 'N':
-            puts("Começando um novo jogo!");
-            puts("Primeiro vamos conhecer os jogadores...");
-            char nome_jogador1[20], nome_jogador2[20];
-            puts("Qual o nome do jogador 1, que vai comandar o [R]ei, o [p]ríncipe e os [g]uerreiros?");
-            scanf("%s", nome_jogador1);
-            puts("E o jogador 2, que vai comandar o [F]azendeiro, seu [f]ilho e os [c]amponeses?");
-            scanf("%s", nome_jogador2);
-            imprime_tabuleiro(matriz_posicao);
-
+            comeca_jogo(&jog_atual, nome_jogador1, nome_jogador2, &game);
+            while (game) {
+                imprime_tabuleiro(matriz_posicao);
+                pede_valida_jogada(matriz_posicao, &jog_atual, nome_jogador1, nome_jogador2);
+                troca_turno(&jog_atual);
+            }
+            /*
             // Vai repetir até o que o jogador informe uma jogada válida
             int fazer_jogada = 0;
             while (fazer_jogada == 0) {
-                // Quando o sorteio de quem começa estiver pronto, colocar no lugar do 1 abaixo
-                fazer_jogada = pede_valida_jogada(matriz_posicao, 1, nome_jogador1, nome_jogador2);
+                fazer_jogada = pede_valida_jogada(matriz_posicao, &jog_atual, nome_jogador1, nome_jogador2);
             }
 
             if (fazer_jogada) {
                 puts("A jogada será realizada...");
             }
-
+            */
             break;
         case 'A': puts("Funcao APRENDA A JOGAR ainda nao desenvolvida..."); break;
         case 'C': puts("Funcao CARREGAR JOGO SALVO ainda nao desenvolvida..."); break;
@@ -220,6 +228,16 @@ void inicializa_matriz_posicao(char V1[TAM_VETOR], char V2[TAM_VETOR], char pos[
     }
 }
 
+void comeca_jogo(int *jog_atual, char nome_jogador1[], char nome_jogador2[], bool *game) {
+    puts("Começando um novo jogo!");
+    *game = true;
+    puts("Primeiro vamos conhecer os jogadores...");
+    puts("Qual o nome do jogador 1, que vai comandar o [R]ei, o [p]ríncipe e os [g]uerreiros?");
+    scanf("%s", nome_jogador1);
+    puts("E o jogador 2, que vai comandar o [F]azendeiro, seu [f]ilho e os [c]amponeses?");
+    scanf("%s", nome_jogador2);
+}
+
 void imprime_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
     // Imprime em tela o tabuleiro, sendo a matriz de posições + as strings da moldura
     // Se T[x][y] != '0', putchar. Se == '0', printf("string");
@@ -271,7 +289,7 @@ void imprime_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
     }
 }
 
-int pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int jog_atual, char J1[], char J2[]) {
+int pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int *jog_atual, char NJ1[], char NJ2[]) {
     // coord_x_l = coordenada na forma letra, depois traduzida para forma número
     // x e y apenas para facilitar a escrita
     char coord_x_l;
@@ -285,10 +303,10 @@ int pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int jog_atual, char J1[],
     // Enquanto a peca escolhida e o destino nao forem validos, solicita novamente para o jogador
     while ((peca_valida != 1) && (jog_valida != 1)) {
         // Pede as coordenadas, troca por algo que a matriz entende e valida
-        if (jog_atual == 1) {
-            printf("%s, sua vez!\n", J1);
+        if (*jog_atual == 1) {
+            printf("%s, sua vez!\n", NJ1);
         } else {
-            printf("%s, sua vez!\n", J2);
+            printf("%s, sua vez!\n", NJ2);
         }
         printf("Digite a coordenada alfabética (eixo X) da peça que você quer mover: ");
         scanf(" %c", &coord_x_l);
@@ -344,7 +362,7 @@ int pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int jog_atual, char J1[],
         // Verifica as peças { R, p, g } ou { F, f, c } dependendo se é o jogador 1 ou 2
         // Se tiver um espaço, pede outra coordenada
         if (peca_valida == 1) {
-            if (jog_atual == 1) {
+            if (*jog_atual == 1) {
                 if ((pos[peca[x]][peca[y]] == 'R') || (pos[peca[x]][peca[y]] == 'p') || (pos[peca[x]][peca[y]] == 'g')) {
                     peca_valida = 1;
                 } else if (pos[peca[x]][peca[y]] == ' ') {
@@ -356,7 +374,7 @@ int pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int jog_atual, char J1[],
                     printf("Voce escolheu uma peca do adversario...\n");
                     continue;
                 }
-            } else if (jog_atual == 2) {
+            } else if (*jog_atual == 2) {
                 if ((pos[peca[x]][peca[y]] == 'F') || (pos[peca[x]][peca[y]] == 'f') || (pos[peca[x]][peca[y]] == 'c')) {
                     peca_valida = 1;
                 } else if (pos[peca[x]][peca[y]] == ' ') {
@@ -530,4 +548,14 @@ int faz_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int coord_peca[2], int coord_dest
     pos[coord_peca[x]][coord_peca[y]] = tmp_move_peca;
     imprime_tabuleiro(pos);
     return 1;
+}
+
+void troca_turno(int *jog_atual) {
+    if (*jog_atual == 1) {
+        *jog_atual = 2;
+        printf("O jogador agora eh o %d...\n", *jog_atual);
+    } else {
+        *jog_atual = 1;
+        printf("O jogador agora eh o %d...\n", *jog_atual);
+    }
 }
