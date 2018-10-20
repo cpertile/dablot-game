@@ -49,6 +49,13 @@ int main(void) {
             comeca_jogo(&jog_atual, nome_jogador1, nome_jogador2, &game);
             while (game) {
                 imprime_tabuleiro(matriz_posicao);
+                
+                int peca[2];
+                do {
+                    pedir_peca(&jog_atual, peca);
+                } while (!validar_peca(&jog_atual, peca));
+
+
                 pede_valida_jogada(matriz_posicao, &jog_atual, nome_jogador1, nome_jogador2);
             }
             break;
@@ -290,7 +297,86 @@ void imprime_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
     putchar('\n');
 }
 
+void pedir_peca(int *jog_atual, char peca) {
+    // coord_x_l = coordenada na forma letra, depois traduzida para forma número
+    // x e y apenas para facilitar a escrita
+    char coord_x_l;
+    int coord_x_n, coord_y;
+    const int x = 0, y = 1;
+
+    // Variáveis de controle do while
+    int peca_valida = 0;
+
+    // Enquanto a peca escolhida e o destino nao forem validos, solicita novamente para o jogador
+    while (!peca_valida) {
+        // Pede as coordenadas e troca por algo que a matriz entende
+        if (*jog_atual == 1) {
+            printf("%s, sua vez!\n", NJ1);
+        } else {
+            printf("%s, sua vez!\n", NJ2);
+        }
+        printf("Digite a coordenada alfabética (eixo X) da peça que você quer mover: ");
+        scanf(" %c", &coord_x_l);
+        coord_x_l = toupper(coord_x_l);
+        switch(coord_x_l) {
+            case 'A': coord_x_n = 0; break;
+            case 'B': coord_x_n = 1; break;
+            case 'C': coord_x_n = 2; break;
+            case 'D': coord_x_n = 3; break;
+            case 'E': coord_x_n = 4; break;
+            case 'F': coord_x_n = 5; break;
+            case 'G': coord_x_n = 6; break;
+            case 'H': coord_x_n = 7; break;
+            case 'I': coord_x_n = 8; break;
+            case 'J': coord_x_n = 9; break;
+            case 'K': coord_x_n = 10; break;
+            default: coord_x_n = 11;
+        }
+        printf("Digite a coordenada numérica (eixo Y) da peça que você quer mover: ");
+        scanf("%d", &coord_y);
+        coord_y -= 1;
+
+        // Guarda as coordenadas no vetor
+        peca[2] = { coord_x_n, coord_y };
+    }
+}
+
+bool validar_peca(int *jog_atual, char peca) {
+    // Verificar se jogador não digitou uma combinação inválida tipo A2
+    // Ou se digitou algo fora da matriz de posição do tabuleiro
+    // Princípio Coluna par Linha par / Coluna ímpar linha ímpar
+    const int x = 0, y = 1;
+    int coord_valida = 0;
+
+    if ((peca[x] >= LIM_ESQUERDO) && (peca[x] <= LIM_DIREITO) && (peca[y] >= LIM_SUPERIOR) && (peca[y] <= LIM_INFERIOR)) {
+        if (peca[x] % 2 == 0) {
+            if (peca[y] % 2 == 0) {
+                coord_valida = 1;
+            } else {
+                coord_valida = 0;
+                puts("Voce escolheu uma combinacao invalida, tente novamente...");
+                return false;
+            }
+        } else {
+            if (coord_y % 2 == 1) {
+                coord_valida = 1;
+            } else {
+                coord_valida = 0;
+                puts("Voce escolheu uma combinacao invalida, tente novamente...");
+                return false;
+            }
+        }
+    } else {
+        coord_valida = 0;
+        puts("Voce escolheu uma combinacao invalida, tente novamente...");
+        return false;
+    }
+
+
+}
+
 void pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int *jog_atual, char NJ1[], char NJ2[]) {
+/*
     // coord_x_l = coordenada na forma letra, depois traduzida para forma número
     // x e y apenas para facilitar a escrita
     char coord_x_l;
@@ -333,6 +419,7 @@ void pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int *jog_atual, char NJ1
         // Criado vetor para guardar as coordenadas da peça escolhida
         int peca[2] = { coord_x_n, coord_y };
 
+
         // Verificar se jogador não digitou uma combinação inválida tipo A2
         // Ou se digitou algo fora da matriz de posição do tabuleiro
         // Princípio Coluna par Linha par / Coluna ímpar linha ímpar
@@ -359,7 +446,7 @@ void pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int *jog_atual, char NJ1
             puts("Voce escolheu uma combinacao invalida, tente novamente...");
             continue;
         }
-
+*/
         // Verifica as peças { R, p, g } ou { F, f, c } dependendo se é o jogador 1 ou 2
         // Se tiver um espaço, pede outra coordenada
 
