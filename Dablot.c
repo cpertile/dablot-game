@@ -22,7 +22,7 @@ void pede_valida_jogada(char[TAM_X_TAB][TAM_Y_TAB], int *, char[*], char[*]);
 void faz_jogada(char[TAM_X_TAB][TAM_Y_TAB], int[*], int [*]);
 void troca_turno(int *);
 int valida_peca(char pos[TAM_X_TAB][TAM_Y_TAB], int [*], int *, char);
-int valida_captura(int *, char );
+
 
 int main(void) {
     // Variáveis gerais de funcionamento
@@ -234,7 +234,8 @@ void imprime_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
     
     // Limpa a tela e printa o cabeçalho
     system("clear");
-    puts("     A  B  C  D  E  F  G  H  I  J  K ");
+    puts("╔═════════════════════════════════════════╗");
+    puts("║     A  B  C  D  E  F  G  H  I  J  K     ║");
     
     // Para cada linha, se o índice da linha for par ou ímpar, acontece algo diferente
     for (y = 0; y < TAM_Y_TAB; y++) {
@@ -242,9 +243,9 @@ void imprime_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
             // Linha índice par (y = 0, linha = 1)
             // Imprime as coordenadas numerais da borda esquerda
             if (y < 10) {
-                printf(" %d  [", y+1);
+                printf("║  %d [", y+1);
             } else {
-                printf(" %d [", y+1);
+                printf("║ %d [", y+1);
             }
             // Imprime ou uma peça ou um separador
             for (x = 0; x < TAM_X_TAB; x++) {
@@ -254,16 +255,20 @@ void imprime_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
                     printf("]---[");
                 }
             }
-            puts("]");
+            if (y < 10) {
+                printf("] %d  ║\n", y+1);
+            } else {
+                printf("] %d ║\n", y+1);
+            }
             if (y < 12) {
-                puts("     | \\ / | \\ / | \\ / | \\ / | \\ / | ");
+                puts("║     | \\ / | \\ / | \\ / | \\ / | \\ / |     ║");
             }
         } else {
             // Linha índice ímpar (y = 1, linha = 2)
             if (y < 9) {
-                printf(" %d   | [", y+1);                
+                printf("║  %d  | [", y+1);                
             } else {
-                printf(" %d  | [", y+1);                
+                printf("║ %d  | [", y+1);                
             }
             for (x = 1; x < TAM_X_TAB-1; x++) {
                 if (T[x][y] != '0') {
@@ -272,10 +277,16 @@ void imprime_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
                     printf("] | [");
                 }
             }
-            puts("] | ");
-            puts("     | / \\ | / \\ | / \\ | / \\ | / \\ | ");
+            if (y < 9) {
+                printf("] |  %d  ║\n", y+1);               
+            } else {
+                printf("] |  %d ║\n", y+1);               
+            }
+            puts("║     | / \\ | / \\ | / \\ | / \\ | / \\ |     ║");
         }
     }
+    puts("║     A  B  C  D  E  F  G  H  I  J  K     ║");
+    puts("╚═════════════════════════════════════════╝");
 }
 
 void pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int *jog_atual, char NJ1[], char NJ2[]) {
@@ -378,6 +389,20 @@ void pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int *jog_atual, char NJ1
             // Verifica em cada coordenada cardeal se está dentro do tabuleiro e se tem espaço disponível
             // Linhas de índice par = todas as coordenadas
             // Linhas de índice ímpar = apenas as coordenadas subcardeais NE, SE, SO e NO
+            // Caso encontre um adversário, verifica se a posição de captura está disponível
+
+            // Biblioteca de posições de captura
+            int cN[2] = { coord_x_n, (coord_y - 4) };
+            int cS[2] = { coord_x_n, (coord_y + 4) };
+            int cE[2] = { (coord_x_n + 4), coord_y };
+            int cO[2] = { (coord_x_n - 4), coord_y };
+            int cNE[2] = { (coord_x_n + 2), (coord_y - 2) };
+            int cSE[2] = { (coord_x_n + 2), (coord_y + 2) };
+            int cSO[2] = { (coord_x_n - 2), (coord_y + 2) };
+            int cNO[2] = { (coord_x_n - 2), (coord_y - 2) };
+
+            // Código abaixo vai virar a função valida_alcance
+            // Deve ser atualizada para a situação onde a peça está cercada de adversários mas pode eliminar pelo menos um deles
             if (coord_x_n % 2 == 0) {
                 if ((N[y] >= LIM_SUPERIOR) && (pos[N[x]][N[y]] == ' ')) {
                     peca_valida = 1;
@@ -470,32 +495,25 @@ void pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int *jog_atual, char NJ1
             }
 
             // Verifica se as coordenadas de destino estão no alcance da peça
-            // Guarda na variável direcao_movimento se for um destino válido
-            int direcao_movimento = 0;
+            // Se não for nenhum do alcance normal de movimento, verifica se é do alcance de captura
+
             if (jog_valida == 1) {
                 if (peca[y] % 2 == 0) { // Linha índice par
-                    if ((dest[x] == N[x]) && (dest[y] == N[y])) { // Direção Norte = 1
-                        direcao_movimento = jog_valida = 1;
-                    } else if ((dest[x] == S[x]) && (dest[y] == S[y])) { // Direção Sul = 2
-                        direcao_movimento = 2;
+                    if ((dest[x] == N[x]) && (dest[y] == N[y])) {
                         jog_valida = 1;
-                    } else if ((dest[x] == E[x]) && (dest[y] == E[y])) { // Direção Leste = 3
-                        direcao_movimento = 3;
+                    } else if ((dest[x] == S[x]) && (dest[y] == S[y])) {
                         jog_valida = 1;
-                    } else if ((dest[x] == O[x]) && (dest[y] == O[y])) { // Direção Oeste = 4
-                        direcao_movimento = 4;
+                    } else if ((dest[x] == E[x]) && (dest[y] == E[y])) {
                         jog_valida = 1;
-                    } else if ((dest[x] == NE[x]) && (dest[y] == NE[y])) { // Direção Nordeste = 5
-                        direcao_movimento = 5;
+                    } else if ((dest[x] == O[x]) && (dest[y] == O[y])) {
                         jog_valida = 1;
-                    } else if ((dest[x] == SE[x]) && (dest[y] == SE[y])) { // Direção Sudeste = 6
-                        direcao_movimento = 6;
+                    } else if ((dest[x] == NE[x]) && (dest[y] == NE[y])) {
                         jog_valida = 1;
-                    } else if ((dest[x] == SO[x]) && (dest[y] == SO[y])) { // Direção Sudoeste = 7
-                        direcao_movimento = 7;
+                    } else if ((dest[x] == SE[x]) && (dest[y] == SE[y])) {
                         jog_valida = 1;
-                    } else if ((dest[x] == NO[x]) && (dest[y] == NO[y])) { // Direção Noroeste = 8
-                        direcao_movimento = 8;
+                    } else if ((dest[x] == SO[x]) && (dest[y] == SO[y])) {
+                        jog_valida = 1;
+                    } else if ((dest[x] == NO[x]) && (dest[y] == NO[y])) {
                         jog_valida = 1;
                     } else {
                         jog_valida = 0;
@@ -504,16 +522,12 @@ void pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int *jog_atual, char NJ1
                     }
                 } else { // Linha índice ímpar
                     if ((dest[x] == NE[x]) && (dest[y] == NE[y])) {
-                        direcao_movimento = 5;
                         jog_valida = 1;
                     } else if ((dest[x] == SE[x]) && (dest[y] == SE[y])) {
-                        direcao_movimento = 6;
                         jog_valida = 1;
                     } else if ((dest[x] == SO[x]) && (dest[y] == SO[y])) {
-                        direcao_movimento = 7;
                         jog_valida = 1;
                     } else if ((dest[x] == NO[x]) && (dest[y] == NO[y])) {
-                        direcao_movimento = 8;
                         jog_valida = 1;
                     } else {
                         jog_valida = 0;
@@ -521,41 +535,13 @@ void pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int *jog_atual, char NJ1
                         continue;
                     }
                 }
-
-                /*
-                if (peca[y] % 2 == 0) {
-                    if (((dest[x] == N[x]) && (dest[y] == N[y])) || ((dest[x] == S[x]) && (dest[y] == S[y])) || 
-                        ((dest[x] == E[x]) && (dest[y] == E[y])) || ((dest[x] == O[x]) && (dest[y] == O[y])) || 
-                        ((dest[x] == NE[x]) && (dest[y] == NE[y])) || ((dest[x] == SE[x]) && (dest[y] == SE[y])) || 
-                        ((dest[x] == SO[x]) && (dest[y] == SO[y])) || ((dest[x] == NO[x]) && (dest[y] == NO[y]))) {
-                        jog_valida = 1;
-                    } else {
-                        jog_valida = 0;
-                        puts("Essa coordenada estah fora do alcance da sua peca...");
-                        continue;
-                    }
-                } else {
-                    if (((dest[x] == NE[x]) && (dest[y] == NE[y])) || ((dest[x] == SE[x]) && (dest[y] == SE[y])) || 
-                        ((dest[x] == SO[x]) && (dest[y] == SO[y])) || ((dest[x] == NO[x]) && (dest[y] == NO[y]))) {
-                        jog_valida = 1;
-                    } else {
-                        jog_valida = 0;
-                        puts("Essa coordenada estah fora do alcance da sua peca...");
-                        continue;
-                    }
-                }
-                */
             }
             
-            // Verificando se nessa coordenada tem um espaço ou peça do oponente ou é inválida
+            // Verificando se nessa coordenada tem um espaço
             if (jog_valida == 1) {
                 if (pos[dest[x]][dest[y]] == ' ') {
                     faz_jogada(pos, peca, dest);
                     troca_turno(jog_atual);
-                } else if (valida_peca(pos, dest, jog_atual, 'O')) { // Se tiver uma peca do Outro time
-                    // *** CONTINUAR DAQUI ***
-                    // Fazer chamada da valida_captura, desenvolver a mesma
-                    valida_captura(pos, peca, jog_atual, direcao_movimento);
                 } else {
                     jog_valida = 0;
                     puts("Essa casa nao esta disponivel, tente outra...");
@@ -632,37 +618,6 @@ int valida_peca(char pos[TAM_X_TAB][TAM_Y_TAB], int coord[2], int *jog_atual, ch
                 puts("Voce escolheu uma peca do adversario...");
                 return 0;
             }
-        }
-    }
-}
-
-int valida_captura(char pos[TAM_X_TAB][TAM_Y_TAB], int coord_peca[*], int *jog_atual, int direcao_movimento) {
-    // De acordo com qual jogador iniciou a captura e com a direção, calcula qual coordenada deve estar livre para a captura ser válida
-    // Verifica na matriz posição se nessa coordenada tem um espaço ou não
-    int coord_captura[2], x = 0, y = 1;
-    if (*jog_atual == 1) {
-        switch(direcao_movimento) {
-            case 1: coord_captura[2] = {coord_peca[x]}; break;
-            case 2: break;
-            case 3: break;
-            case 4: break;
-            case 5: break;
-            case 6: break;
-            case 7: break;
-            case 8: break;
-            default:
-        }
-    } else { // Jogador 2
-        switch(direcao_movimento) {
-            case 1: break;
-            case 2: break;
-            case 3: break;
-            case 4: break;
-            case 5: break;
-            case 6: break;
-            case 7: break;
-            case 8: break;
-            default:
         }
     }
 }
