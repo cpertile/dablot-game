@@ -287,6 +287,7 @@ void imprime_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
     }
     puts("║     A  B  C  D  E  F  G  H  I  J  K     ║");
     puts("╚═════════════════════════════════════════╝");
+    putchar('\n');
 }
 
 void pede_valida_jogada(char pos[TAM_X_TAB][TAM_Y_TAB], int *jog_atual, char NJ1[], char NJ2[]) {
