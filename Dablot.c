@@ -103,7 +103,7 @@ char menu_inicial() {
     system("clear");
     putchar('\n');
     puts( CNZA "  ╔══════════════════════════════╗" RST);
-    puts( CNZA "  ║" AZUL " Bem-vindo(a) ao jogo Dablot!" RST CNZA " ║" RST);
+    puts( CNZA "  ║" BNCO " Bem-vindo(a) ao jogo Dablot!" RST CNZA " ║" RST);
     puts( CNZA "  ╚══════════════════════════════╝" RST);
     putchar('\n');
     while (escolha != 'S') {
