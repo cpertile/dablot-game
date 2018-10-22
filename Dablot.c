@@ -1,4 +1,4 @@
-// Dablot v 0.6.0
+// Dablot v 0.7.0
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -13,6 +13,16 @@
 #define LIM_INFERIOR 12
 #define LIM_ESQUERDO 0
 #define LIM_DIREITO 10
+
+#define VRML "\x1B[31m"
+#define VERD "\x1B[32m"
+#define AMRL "\x1B[33m"
+#define AZUL "\x1B[34m"
+#define MGNT "\x1B[35m"
+#define CIAN "\x1B[36m"
+#define BNCO "\x1B[37m"
+#define CNZA "\x1B[90m"
+#define RST  "\x1B[0m"
 
 char menu_inicial(void);
 void inicializar_vetor_pecas(char[*], int);
@@ -258,8 +268,8 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
     
     // Limpa a tela e printa o cabeçalho
     system("clear");
-    puts("╔═════════════════════════════════════════╗");
-    puts("║     A  B  C  D  E  F  G  H  I  J  K     ║");
+    puts( CNZA "╔═════════════════════════════════════════╗" RST );
+    puts( CNZA "║" RST "     A  B  C  D  E  F  G  H  I  J  K     " CNZA "║" RST );
     
     // Para cada linha, se o índice da linha for par ou ímpar, acontece algo diferente
     for (y = 0; y < TAM_Y_TAB; y++) {
@@ -267,50 +277,50 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
             // Linha índice par (y = 0, linha = 1)
             // Imprime as coordenadas numerais da borda esquerda
             if (y < 10) {
-                printf("║  %d [", y+1);
+                printf( CNZA "║" RST "  %d " CNZA "[" RST, y+1);
             } else {
-                printf("║ %d [", y+1);
+                printf( CNZA "║" RST " %d " CNZA "[" RST, y+1);
             }
             // Imprime ou uma peça ou um separador
             for (x = 0; x < TAM_X_TAB; x++) {
                 if (T[x][y] != '0') {
                     putchar(T[x][y]);
                 } else {
-                    printf("]---[");
+                    printf( CNZA "]---[" RST );
                 }
             }
             if (y < 10) {
-                printf("] %d  ║\n", y+1);
+                printf( CNZA "]" RST " %d  " CNZA "║" RST "\n", y+1);
             } else {
-                printf("] %d ║\n", y+1);
+                printf( CNZA "]" RST " %d " CNZA "║" RST "\n", y+1);
             }
             if (y < 12) {
-                puts("║     | \\ / | \\ / | \\ / | \\ / | \\ / |     ║");
+                puts( CNZA "║     | \\ / | \\ / | \\ / | \\ / | \\ / |     ║" RST);
             }
         } else {
             // Linha índice ímpar (y = 1, linha = 2)
             if (y < 9) {
-                printf("║  %d  | [", y+1);                
+                printf( CNZA "║" RST "  %d  " CNZA "| [" RST, y+1);                
             } else {
-                printf("║ %d  | [", y+1);                
+                printf( CNZA "║" RST " %d  " CNZA "| [" RST, y+1);                
             }
             for (x = 1; x < TAM_X_TAB-1; x++) {
                 if (T[x][y] != '0') {
                     putchar(T[x][y]);
                 } else {
-                    printf("] | [");
+                    printf( CNZA "] | [" RST);
                 }
             }
             if (y < 9) {
-                printf("] |  %d  ║\n", y+1);               
+                printf( CNZA "] |" RST "  %d  " CNZA "║" RST "\n", y+1);               
             } else {
-                printf("] |  %d ║\n", y+1);               
+                printf( CNZA "] |" RST "  %d " CNZA "║" RST "\n", y+1);               
             }
-            puts("║     | / \\ | / \\ | / \\ | / \\ | / \\ |     ║");
+            puts( CNZA "║     | / \\ | / \\ | / \\ | / \\ | / \\ |     ║" RST);
         }
     }
-    puts("║     A  B  C  D  E  F  G  H  I  J  K     ║");
-    puts("╚═════════════════════════════════════════╝");
+    puts( CNZA "║" RST "     A  B  C  D  E  F  G  H  I  J  K     " CNZA "║" RST);
+    puts( CNZA "╚═════════════════════════════════════════╝" RST);
     putchar('\n');
 }
 
