@@ -32,14 +32,14 @@ void imprimir_tabuleiro(const char[TAM_X_TAB][TAM_Y_TAB]);
 void pedir_peca(const int*, int[*], char[*], char[*]);
 bool validar_peca(const int*, const int[*], const char[TAM_X_TAB][TAM_Y_TAB]);
 bool validar_alcance(const int[*], const char[TAM_X_TAB][TAM_Y_TAB], int[*], int[*], int[*], int[*], int[*],
-    int[*], int[*], int[*], int*, int *, int *, int *, int *, int *, int *, int *,
+    int[*], int[*], int[*], int*, int*, int*, int*, int*, int*, int*, int*,
     int[*], int[*], int[*], int[*], int[*],
-    int[*], int[*], int[*], int*, int *, int *, int *, int *, int *, int *, int *);
+    int[*], int[*], int[*], int*, int*, int*, int*, int*, int*, int*, int*);
 void pedir_destino(int[*]);
 bool validar_destino(const int[*], const int[*], char[TAM_X_TAB][TAM_Y_TAB], int[*], int[*], int[*], int[*], int[*],
-    int[*], int[*], int[*], int *, int *, int *, int *, int *, int *, int*, int*,
+    int[*], int[*], int[*], int*, int*, int*, int*, int*, int*, int*, int*,
     int[*], int[*], int[*], int[*], int[*],
-    int[*], int[*], int[*], int *, int *, int *, int *, int *, int *, int *, int *, char [*], char[*]);
+    int[*], int[*], int[*], int*, int*, int*, int*, int*, int*, int*, int*, char[*], char[*]);
 void capturar_peca(int[*], char[TAM_X_TAB][TAM_Y_TAB], char[*], char[*]);
 void fazer_jogada(char[TAM_X_TAB][TAM_Y_TAB], const int[*], const int [*]);
 void trocar_turno(int*);
@@ -102,24 +102,24 @@ char menu_inicial() {
     // Limpa a tela e imprime o menu inicial do jogo
     system("clear");
     putchar('\n');
-    puts("  ╔══════════════════════════════╗");
-    puts("  ║ Bem-vindo(a) ao jogo Dablot! ║");
-    puts("  ╚══════════════════════════════╝");
+    puts( CNZA "  ╔══════════════════════════════╗" RST);
+    puts( CNZA "  ║" AZUL " Bem-vindo(a) ao jogo Dablot!" RST CNZA " ║" RST);
+    puts( CNZA "  ╚══════════════════════════════╝" RST);
     putchar('\n');
     while (escolha != 'S') {
-        puts("╔══════════════════════════════════╗");
-        puts("║ Digite (A) para Aprender a jogar ║");
-        puts("║      Digite (I) para Iniciar     ║");
-        puts("║       Digite (S) para Sair       ║");
-        puts("╚══════════════════════════════════╝");
+        puts( CNZA "╔══════════════════════════════════╗" RST);
+        puts( CNZA "║" RST " Digite (A) para Aprender a jogar " CNZA "║" RST);
+        puts( CNZA "║" RST "      Digite (I) para Iniciar     " CNZA "║" RST);
+        puts( CNZA "║" RST "       Digite (S) para Sair       " CNZA "║" RST);
+        puts( CNZA "╚══════════════════════════════════╝" RST);
         putchar('\n');
         scanf(" %c", &escolha);
         escolha = toupper(escolha);
         if (escolha == 'I') {
             while ((escolha != 'N' || escolha != 'C')) {
-                puts("╔═════════════════════════════════════════════════════╗");
-                puts("║ Deseja um Novo Jogo (N) ou Carregar Jogo Salvo (C)? ║");
-                puts("╚═════════════════════════════════════════════════════╝");
+                puts( CNZA "╔═════════════════════════════════════════════════════╗" RST);
+                puts( CNZA "║" RST " Deseja um Novo Jogo (N) ou Carregar Jogo Salvo (C)? " CNZA "║" RST);
+                puts( CNZA "╚═════════════════════════════════════════════════════╝" RST);
                 scanf(" %c", &escolha);
                 escolha = toupper(escolha);
                 return escolha;
@@ -255,9 +255,9 @@ void comecar_jogo(char nome_jogador1[], char nome_jogador2[], bool *game) {
     puts("Começando um novo jogo!");
     *game = true;
     puts("Primeiro vamos conhecer os jogadores...");
-    puts("Qual o nome do jogador 1, que vai comandar o [R]ei, o [p]ríncipe e os [g]uerreiros?");
+    puts("Qual o nome do jogador 1, que vai comandar o " MGNT "[R]ei, o [p]ríncipe e os [g]uerreiros?" RST);
     scanf("%s", nome_jogador1);
-    puts("E o jogador 2, que vai comandar o [F]azendeiro, seu [f]ilho e os [c]amponeses?");
+    puts("E o jogador 2, que vai comandar o " CIAN "[F]azendeiro, seu [f]ilho e os [c]amponeses?" RST);
     scanf("%s", nome_jogador2);
 }
 
