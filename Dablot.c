@@ -263,7 +263,7 @@ void comecar_jogo(char nome_jogador1[], char nome_jogador2[], bool *game) {
 
 void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
     // Imprime em tela o tabuleiro, sendo a matriz de posições + as strings da moldura
-    // Se T[x][y] != '0', putchar. Se == '0', printf("string");
+    // Se T[x][y] != '0', imprima em tela. Se == '0', imprima a string separadora
     int x, y;
     
     // Limpa a tela e printa o cabeçalho
@@ -284,7 +284,18 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
             // Imprime ou uma peça ou um separador
             for (x = 0; x < TAM_X_TAB; x++) {
                 if (T[x][y] != '0') {
-                    putchar(T[x][y]);
+                    //putchar(T[x][y]);
+                    switch(T[x][y]) {
+                        case ' ': putchar(T[x][y]); break;
+
+                        case 'g':
+                        case 'p':
+                        case 'R': printf( MGNT "%c" RST, T[x][y]); break;
+
+                        case 'c':
+                        case 'f':
+                        case 'F': printf( CIAN "%c" RST, T[x][y]); break;
+                    }
                 } else {
                     printf( CNZA "]---[" RST );
                 }
@@ -306,7 +317,18 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
             }
             for (x = 1; x < TAM_X_TAB-1; x++) {
                 if (T[x][y] != '0') {
-                    putchar(T[x][y]);
+                    //putchar(T[x][y]);
+                    switch(T[x][y]) {
+                        case ' ': putchar(T[x][y]); break;
+
+                        case 'g':
+                        case 'p':
+                        case 'R': printf( MGNT "%c" RST, T[x][y]); break;
+
+                        case 'c':
+                        case 'f':
+                        case 'F': printf( CIAN "%c" RST, T[x][y]); break;
+                    }
                 } else {
                     printf( CNZA "] | [" RST);
                 }
