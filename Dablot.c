@@ -33,6 +33,7 @@ bool validar_destino(const int[*], const int[*], char[TAM_X_TAB][TAM_Y_TAB], int
 void capturar_peca(int[*], char[TAM_X_TAB][TAM_Y_TAB], char[*], char[*]);
 void fazer_jogada(char[TAM_X_TAB][TAM_Y_TAB], const int[*], const int [*]);
 void trocar_turno(int*);
+int verificar_vetor_pecas(char[*], char[*], int*);
 
 
 int main(void) {
@@ -53,6 +54,7 @@ int main(void) {
     int icN = 0, icS = 0, icE = 0, icO = 0, icNE = 0, icSE = 0, icSO = 0, icNO = 0;
 
     // Inicialização dos vetores peças (vetor, nº do jogador)
+    // TODO: transformar isso numa chamada só
     inicializar_vetor_pecas(pecas_jog1, 1);
     inicializar_vetor_pecas(pecas_jog2, 2);
 
@@ -75,6 +77,8 @@ int main(void) {
                     cN, cS, cE, cO, cNE, cSE, cSO, cNO, &icN, &icS, &icE, &icO, &icNE, &icSE, &icSO, &icNO, pecas_jog1, pecas_jog2)) continue;
                 fazer_jogada(matriz_posicao, peca, dest);
                 trocar_turno(&jog_atual);
+                // TODO: colocar a função abaixo num if, se ela retornar 0, deve chamar a função finalizar_jogo()
+                verificar_vetor_pecas(pecas_jog1, pecas_jog2, &jog_atual);
             }
             break;
         case 'A': puts("Funcao APRENDA A JOGAR ainda nao desenvolvida..."); break;
@@ -1144,4 +1148,29 @@ void trocar_turno(int *jog_atual) {
     } else {
         *jog_atual = 1;
     }
+}
+
+int verificar_vetor_pecas(char pecas_jog1[], char pecas_jog2[], int *jog_atual) {
+    int i;
+    int perdedor = 0;
+    for (i = 0; i < 30; ++i) {
+        if (*jog_atual == 1) {
+            if (pecas_jog1[i] != ' ') {
+                return 1;
+            } else {
+                perdedor = 1;
+                continue;
+            }
+        } else { // Jogador 2
+            if (pecas_jog2[i] != ' ') {
+                return 1;
+            } else {
+                perdedor = 2;
+                continue;
+            }
+        }
+    }
+    printf("O jogador %d ficou sem pecas e perdeu! Fim de jogo!\n", perdedor);
+    sleep(2);
+    return 0;
 }
