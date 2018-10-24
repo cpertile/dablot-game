@@ -14,12 +14,12 @@
 #define LIM_ESQUERDO 0
 #define LIM_DIREITO 10
 
-#define VRML "\x1B[31m"
+#define VRML "\x1B[91m"
 #define VERD "\x1B[32m"
 #define AMRL "\x1B[33m"
 #define AZUL "\x1B[34m"
-#define MGNT "\x1B[35m"
-#define CIAN "\x1B[36m"
+#define MGNT "\x1B[95m" 
+#define CIAN "\x1B[96m"
 #define BNCO "\x1B[37m"
 #define CNZA "\x1B[90m"
 #define RST  "\x1B[0m"
@@ -268,8 +268,8 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
     
     // Limpa a tela e printa o cabeçalho
     system("clear");
-    puts( CNZA "╔═════════════════════════════════════════╗" RST );
-    puts( CNZA "║" RST "     A  B  C  D  E  F  G  H  I  J  K     " CNZA "║" RST );
+    puts(CNZA "@╔═════════════════════════════════════════╗");
+    puts(CNZA "@║     "RST"A  "CIAN"B  "RST"C  "CIAN"D  "RST"E  "CIAN"F  "RST"G  "CIAN"H  "RST"I  "CIAN"J  "RST"K     "CNZA"║");
     
     // Para cada linha, se o índice da linha for par ou ímpar, acontece algo diferente
     for (y = 0; y < TAM_Y_TAB; y++) {
@@ -277,9 +277,9 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
             // Linha índice par (y = 0, linha = 1)
             // Imprime as coordenadas numerais da borda esquerda
             if (y < 10) {
-                printf( CNZA "║" RST "  %d " CNZA "[" RST, y+1);
+                printf(CNZA "@║" RST "  %d " CNZA "[", y+1);
             } else {
-                printf( CNZA "║" RST " %d " CNZA "[" RST, y+1);
+                printf(CNZA "@║" RST " %d " CNZA "[", y+1);
             }
             // Imprime ou uma peça ou um separador
             for (x = 0; x < TAM_X_TAB; x++) {
@@ -290,30 +290,30 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
 
                         case 'g':
                         case 'p':
-                        case 'R': printf( MGNT "%c" RST, T[x][y]); break;
+                        case 'R': printf(VRML "%c", T[x][y]); break;
 
                         case 'c':
                         case 'f':
-                        case 'F': printf( CIAN "%c" RST, T[x][y]); break;
+                        case 'F': printf(VERD "%c", T[x][y]); break;
                     }
                 } else {
-                    printf( CNZA "]---[" RST );
+                    printf(CNZA "]---[");
                 }
             }
             if (y < 10) {
-                printf( CNZA "]" RST " %d  " CNZA "║" RST "\n", y+1);
+                printf(CNZA "]" RST " %d  " CNZA "║\n", y+1);
             } else {
-                printf( CNZA "]" RST " %d " CNZA "║" RST "\n", y+1);
+                printf(CNZA "]" RST " %d " CNZA "║\n", y+1);
             }
             if (y < 12) {
-                puts( CNZA "║     | \\ / | \\ / | \\ / | \\ / | \\ / |     ║" RST);
+                puts(CNZA "@║     | \\ / | \\ / | \\ / | \\ / | \\ / |     ║");
             }
         } else {
             // Linha índice ímpar (y = 1, linha = 2)
             if (y < 9) {
-                printf( CNZA "║" RST "  %d  " CNZA "| [" RST, y+1);                
+                printf(CNZA"@║" CIAN "  %d  " CNZA "| [", y+1);                
             } else {
-                printf( CNZA "║" RST " %d  " CNZA "| [" RST, y+1);                
+                printf(CNZA"@║" CIAN " %d  " CNZA "| [", y+1);                
             }
             for (x = 1; x < TAM_X_TAB-1; x++) {
                 if (T[x][y] != '0') {
@@ -323,26 +323,26 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
 
                         case 'g':
                         case 'p':
-                        case 'R': printf( MGNT "%c" RST, T[x][y]); break;
+                        case 'R': printf(VRML "%c", T[x][y]); break;
 
                         case 'c':
                         case 'f':
-                        case 'F': printf( CIAN "%c" RST, T[x][y]); break;
+                        case 'F': printf(VERD "%c", T[x][y]); break;
                     }
                 } else {
-                    printf( CNZA "] | [" RST);
+                    printf(CNZA"] | [");
                 }
             }
             if (y < 9) {
-                printf( CNZA "] |" RST "  %d  " CNZA "║" RST "\n", y+1);               
+                printf(CNZA "] |" CIAN "  %d  " CNZA "║\n", y+1);               
             } else {
-                printf( CNZA "] |" RST "  %d " CNZA "║" RST "\n", y+1);               
+                printf(CNZA "] |" CIAN "  %d " CNZA "║\n", y+1);               
             }
-            puts( CNZA "║     | / \\ | / \\ | / \\ | / \\ | / \\ |     ║" RST);
+            puts(CNZA "@║     | / \\ | / \\ | / \\ | / \\ | / \\ |     ║");
         }
     }
-    puts( CNZA "║" RST "     A  B  C  D  E  F  G  H  I  J  K     " CNZA "║" RST);
-    puts( CNZA "╚═════════════════════════════════════════╝" RST);
+    puts(CNZA "@║     "RST"A  "CIAN"B  "RST"C  "CIAN"D  "RST"E  "CIAN"F  "RST"G  "CIAN"H  "RST"I  "CIAN"J  "RST"K     "CNZA"║");
+    puts(CNZA "@╚═════════════════════════════════════════╝" RST);
     putchar('\n');
 }
 
