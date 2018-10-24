@@ -22,6 +22,7 @@
 #define CIAN "\x1B[96m"
 #define BNCO "\x1B[37m"
 #define CNZA "\x1B[90m"
+#define BCPT "\x1B[30;47m"
 #define RST  "\x1B[0m"
 
 char menu_inicial(void);
@@ -102,24 +103,24 @@ char menu_inicial() {
     // Limpa a tela e imprime o menu inicial do jogo
     system("clear");
     putchar('\n');
-    puts( CNZA "  ╔══════════════════════════════╗" RST);
-    puts( CNZA "  ║" BNCO " Bem-vindo(a) ao jogo Dablot!" RST CNZA " ║" RST);
-    puts( CNZA "  ╚══════════════════════════════╝" RST);
+    puts(CNZA "   ╔══════════════════════════════╗");
+    puts(CNZA "   ║" RST " Bem-vindo(a) ao jogo Dablot!" CNZA " ║");
+    puts(CNZA "   ╚══════════════════════════════╝");
     putchar('\n');
     while (escolha != 'S') {
-        puts( CNZA "╔══════════════════════════════════╗" RST);
-        puts( CNZA "║" RST " Digite (A) para Aprender a jogar " CNZA "║" RST);
-        puts( CNZA "║" RST "      Digite (I) para Iniciar     " CNZA "║" RST);
-        puts( CNZA "║" RST "       Digite (S) para Sair       " CNZA "║" RST);
-        puts( CNZA "╚══════════════════════════════════╝" RST);
+        puts(CNZA " ╔══════════════════════════════════╗");
+        puts(CNZA " ║" RST " Digite (A) para Aprender a jogar " CNZA "║");
+        puts(CNZA " ║" RST "      Digite (I) para Iniciar     " CNZA "║");
+        puts(CNZA " ║" RST "       Digite (S) para Sair       " CNZA "║");
+        puts(CNZA " ╚══════════════════════════════════╝");
         putchar('\n');
         scanf(" %c", &escolha);
         escolha = toupper(escolha);
         if (escolha == 'I') {
             while ((escolha != 'N' || escolha != 'C')) {
-                puts( CNZA "╔═════════════════════════════════════════════════════╗" RST);
-                puts( CNZA "║" RST " Deseja um Novo Jogo (N) ou Carregar Jogo Salvo (C)? " CNZA "║" RST);
-                puts( CNZA "╚═════════════════════════════════════════════════════╝" RST);
+                puts(CNZA " ╔═════════════════════════════════════════════════════╗");
+                puts(CNZA " ║" RST " Deseja um Novo Jogo (N) ou Carregar Jogo Salvo (C)? " CNZA "║");
+                puts(CNZA " ╚═════════════════════════════════════════════════════╝");
                 scanf(" %c", &escolha);
                 escolha = toupper(escolha);
                 return escolha;
@@ -255,9 +256,9 @@ void comecar_jogo(char nome_jogador1[], char nome_jogador2[], bool *game) {
     puts("Começando um novo jogo!");
     *game = true;
     puts("Primeiro vamos conhecer os jogadores...");
-    puts("Qual o nome do jogador 1, que vai comandar o " MGNT "[R]ei, o [p]ríncipe e os [g]uerreiros?" RST);
+    puts("Qual o nome do jogador 1, que vai comandar o [" VRML "R" CNZA "]ei, o [" VRML "p" CNZA "]ríncipe e os [" VRML "g" CNZA "]uerreiros?");
     scanf("%s", nome_jogador1);
-    puts("E o jogador 2, que vai comandar o " CIAN "[F]azendeiro, seu [f]ilho e os [c]amponeses?" RST);
+    puts("E o jogador 2, que vai comandar o [" VERD "F" CNZA "]azendeiro, seu [" VERD "f" CNZA "]ilho e os [" VERD "c" CNZA "]amponeses?");
     scanf("%s", nome_jogador2);
 }
 
@@ -268,8 +269,9 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
     
     // Limpa a tela e printa o cabeçalho
     system("clear");
-    puts(CNZA "@╔═════════════════════════════════════════╗");
-    puts(CNZA "@║     "RST"A  "CIAN"B  "RST"C  "CIAN"D  "RST"E  "CIAN"F  "RST"G  "CIAN"H  "RST"I  "CIAN"J  "RST"K     "CNZA"║");
+    putchar('\n');
+    puts(CNZA " @╔═════════════════════════════════════════╗");
+    puts(CNZA " @║     "RST"A  "CNZA"B  "RST"C  "CNZA"D  "RST"E  "CNZA"F  "RST"G  "CNZA"H  "RST"I  "CNZA"J  "RST"K     "CNZA"║");
     
     // Para cada linha, se o índice da linha for par ou ímpar, acontece algo diferente
     for (y = 0; y < TAM_Y_TAB; y++) {
@@ -277,9 +279,9 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
             // Linha índice par (y = 0, linha = 1)
             // Imprime as coordenadas numerais da borda esquerda
             if (y < 10) {
-                printf(CNZA "@║" RST "  %d " CNZA "[", y+1);
+                printf(CNZA " @║" RST "  %d " CNZA "[", y+1);
             } else {
-                printf(CNZA "@║" RST " %d " CNZA "[", y+1);
+                printf(CNZA " @║" RST " %d " CNZA "[", y+1);
             }
             // Imprime ou uma peça ou um separador
             for (x = 0; x < TAM_X_TAB; x++) {
@@ -306,14 +308,14 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
                 printf(CNZA "]" RST " %d " CNZA "║\n", y+1);
             }
             if (y < 12) {
-                puts(CNZA "@║     | \\ / | \\ / | \\ / | \\ / | \\ / |     ║");
+                puts(CNZA " @║     | \\ / | \\ / | \\ / | \\ / | \\ / |     ║");
             }
         } else {
             // Linha índice ímpar (y = 1, linha = 2)
             if (y < 9) {
-                printf(CNZA"@║" CIAN "  %d  " CNZA "| [", y+1);                
+                printf(CNZA" @║  %d  | [", y+1);                
             } else {
-                printf(CNZA"@║" CIAN " %d  " CNZA "| [", y+1);                
+                printf(CNZA" @║ %d  | [", y+1);                
             }
             for (x = 1; x < TAM_X_TAB-1; x++) {
                 if (T[x][y] != '0') {
@@ -334,15 +336,15 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
                 }
             }
             if (y < 9) {
-                printf(CNZA "] |" CIAN "  %d  " CNZA "║\n", y+1);               
+                printf(CNZA "] |  %d  ║\n", y+1);               
             } else {
-                printf(CNZA "] |" CIAN "  %d " CNZA "║\n", y+1);               
+                printf(CNZA "] |  %d ║\n", y+1);               
             }
-            puts(CNZA "@║     | / \\ | / \\ | / \\ | / \\ | / \\ |     ║");
+            puts(CNZA " @║     | / \\ | / \\ | / \\ | / \\ | / \\ |     ║");
         }
     }
-    puts(CNZA "@║     "RST"A  "CIAN"B  "RST"C  "CIAN"D  "RST"E  "CIAN"F  "RST"G  "CIAN"H  "RST"I  "CIAN"J  "RST"K     "CNZA"║");
-    puts(CNZA "@╚═════════════════════════════════════════╝" RST);
+    puts(CNZA " @║     "RST"A  "CNZA"B  "RST"C  "CNZA"D  "RST"E  "CNZA"F  "RST"G  "CNZA"H  "RST"I  "CNZA"J  "RST"K     "CNZA"║");
+    puts(CNZA " @╚═════════════════════════════════════════╝");
     putchar('\n');
 }
 
@@ -354,9 +356,9 @@ void pedir_peca(const int *jog_atual, int peca[], char nome_jogador1[], char nom
 
     // Pede as coordenadas e troca por algo que a matriz entende
     if (*jog_atual == 1) {
-        printf("%s, sua vez!\n", nome_jogador1);
+        printf(VRML "%s, sua vez!\n" CNZA, nome_jogador1);
     } else {
-        printf("%s, sua vez!\n", nome_jogador2);
+        printf(VERD "%s, sua vez!\n" CNZA, nome_jogador2);
     }
     printf("Digite as coordenadas da peça que você quer mover (ex A8): ");
     scanf(" %c", &coord_x_l);
