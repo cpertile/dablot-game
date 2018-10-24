@@ -26,7 +26,7 @@
 #define RST  "\x1B[0m"
 
 char menu_inicial(void);
-void inicializar_vetor_pecas(char[*], int);
+void inicializar_vetor_pecas(char[*], char[*]);
 void inicializar_matriz_posicao(char[TAM_VETOR], char[TAM_VETOR], char[TAM_X_TAB][TAM_Y_TAB]);
 void comecar_jogo(char[*], char[*], bool*);
 void imprimir_tabuleiro(const char[TAM_X_TAB][TAM_Y_TAB]);
@@ -65,9 +65,7 @@ int main(void) {
     int icN = 0, icS = 0, icE = 0, icO = 0, icNE = 0, icSE = 0, icSO = 0, icNO = 0;
 
     // Inicialização dos vetores peças (vetor, nº do jogador)
-    // TODO: transformar isso numa chamada só
-    inicializar_vetor_pecas(pecas_jog1, 1);
-    inicializar_vetor_pecas(pecas_jog2, 2);
+    inicializar_vetor_pecas(pecas_jog1, pecas_jog2);
 
     // Colocando as peças na matriz de posições (vetor jogador 1, vetor jogador 2 e matriz posição)
     inicializar_matriz_posicao(pecas_jog1, pecas_jog2, matriz_posicao);
@@ -135,29 +133,20 @@ char menu_inicial() {
     return escolha;
 }
 
-void inicializar_vetor_pecas(char V[], int jog) {
+void inicializar_vetor_pecas(char V1[], char V2[]) {
     // Preenche o vetor passado com as peças correspondentes ao jogador 1 ou 2
     int i;
-    if (jog == 1) {
-        for (i = 0; i < 30; ++i) {
-            if (i < 28) {
-                V[i] = 'g';
-            } else  if (i < 29) {
-                  V[i] = 'p';
-               } else {
-                    V[i] = 'R';
-            }
-        }
-    }
-    if (jog == 2) {
-        for (i = 0; i < 30; ++i) {
-            if (i < 28) {
-                V[i] = 'c';
-            } else  if (i < 29) {
-                  V[i] = 'f';
-               } else {
-                    V[i] = 'F';
-            }
+
+    for (i = 0; i < 30; ++i) {
+        if (i < 28) {
+            V1[i] = 'g';
+            V2[i] = 'c';
+        } else  if (i < 29) {
+              V1[i] = 'p';
+              V2[i] = 'f';
+           } else {
+                V1[i] = 'R';
+                V2[i] = 'F';
         }
     }
 }
