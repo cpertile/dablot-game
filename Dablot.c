@@ -1,4 +1,4 @@
-// Dablot v 0.6.0
+// Dablot v 0.7.0
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,6 +14,17 @@
 #define LIM_ESQUERDO 0
 #define LIM_DIREITO 10
 
+#define VRML "\x1B[91m"
+#define VERD "\x1B[32m"
+#define AMRL "\x1B[33m"
+#define AZUL "\x1B[34m"
+#define MGNT "\x1B[95m" 
+#define CIAN "\x1B[96m"
+#define BNCO "\x1B[37m"
+#define CNZA "\x1B[90m"
+#define BCPT "\x1B[30;47m"
+#define RST  "\x1B[0m"
+
 char menu_inicial(void);
 void inicializar_vetor_pecas(char[*], int);
 void inicializar_matriz_posicao(char[TAM_VETOR], char[TAM_VETOR], char[TAM_X_TAB][TAM_Y_TAB]);
@@ -22,14 +33,14 @@ void imprimir_tabuleiro(const char[TAM_X_TAB][TAM_Y_TAB]);
 void pedir_peca(const int*, int[*], char[*], char[*]);
 bool validar_peca(const int*, const int[*], const char[TAM_X_TAB][TAM_Y_TAB]);
 bool validar_alcance(const int[*], const char[TAM_X_TAB][TAM_Y_TAB], int[*], int[*], int[*], int[*], int[*],
-    int[*], int[*], int[*], int*, int *, int *, int *, int *, int *, int *, int *,
+    int[*], int[*], int[*], int*, int*, int*, int*, int*, int*, int*, int*,
     int[*], int[*], int[*], int[*], int[*],
-    int[*], int[*], int[*], int*, int *, int *, int *, int *, int *, int *, int *);
+    int[*], int[*], int[*], int*, int*, int*, int*, int*, int*, int*, int*);
 void pedir_destino(int[*]);
 bool validar_destino(const int[*], const int[*], char[TAM_X_TAB][TAM_Y_TAB], int[*], int[*], int[*], int[*], int[*],
-    int[*], int[*], int[*], int *, int *, int *, int *, int *, int *, int*, int*,
+    int[*], int[*], int[*], int*, int*, int*, int*, int*, int*, int*, int*,
     int[*], int[*], int[*], int[*], int[*],
-    int[*], int[*], int[*], int *, int *, int *, int *, int *, int *, int *, int *, char [*], char[*]);
+    int[*], int[*], int[*], int*, int*, int*, int*, int*, int*, int*, int*, char[*], char[*]);
 void capturar_peca(int[*], char[TAM_X_TAB][TAM_Y_TAB], char[*], char[*]);
 void fazer_jogada(char[TAM_X_TAB][TAM_Y_TAB], const int[*], const int [*]);
 void trocar_turno(int*);
@@ -96,24 +107,24 @@ char menu_inicial() {
     // Limpa a tela e imprime o menu inicial do jogo
     system("clear");
     putchar('\n');
-    puts("  ╔══════════════════════════════╗");
-    puts("  ║ Bem-vindo(a) ao jogo Dablot! ║");
-    puts("  ╚══════════════════════════════╝");
+    puts(CNZA "   ╔══════════════════════════════╗");
+    puts(CNZA "   ║" RST " Bem-vindo(a) ao jogo Dablot!" CNZA " ║");
+    puts(CNZA "   ╚══════════════════════════════╝");
     putchar('\n');
     while (escolha != 'S') {
-        puts("╔══════════════════════════════════╗");
-        puts("║ Digite (A) para Aprender a jogar ║");
-        puts("║      Digite (I) para Iniciar     ║");
-        puts("║       Digite (S) para Sair       ║");
-        puts("╚══════════════════════════════════╝");
+        puts(CNZA " ╔══════════════════════════════════╗");
+        puts(CNZA " ║" RST " Digite (A) para Aprender a jogar " CNZA "║");
+        puts(CNZA " ║" RST "      Digite (I) para Iniciar     " CNZA "║");
+        puts(CNZA " ║" RST "       Digite (S) para Sair       " CNZA "║");
+        puts(CNZA " ╚══════════════════════════════════╝");
         putchar('\n');
         scanf(" %c", &escolha);
         escolha = toupper(escolha);
         if (escolha == 'I') {
             while ((escolha != 'N' || escolha != 'C')) {
-                puts("╔═════════════════════════════════════════════════════╗");
-                puts("║ Deseja um Novo Jogo (N) ou Carregar Jogo Salvo (C)? ║");
-                puts("╚═════════════════════════════════════════════════════╝");
+                puts(CNZA " ╔═════════════════════════════════════════════════════╗");
+                puts(CNZA " ║" RST " Deseja um Novo Jogo (N) ou Carregar Jogo Salvo (C)? " CNZA "║");
+                puts(CNZA " ╚═════════════════════════════════════════════════════╝");
                 scanf(" %c", &escolha);
                 escolha = toupper(escolha);
                 return escolha;
@@ -249,21 +260,22 @@ void comecar_jogo(char nome_jogador1[], char nome_jogador2[], bool *game) {
     puts("Começando um novo jogo!");
     *game = true;
     puts("Primeiro vamos conhecer os jogadores...");
-    puts("Qual o nome do jogador 1, que vai comandar o [R]ei, o [p]ríncipe e os [g]uerreiros?");
+    puts("Qual o nome do jogador 1, que vai comandar o [" VRML "R" CNZA "]ei, o [" VRML "p" CNZA "]ríncipe e os [" VRML "g" CNZA "]uerreiros?");
     scanf("%s", nome_jogador1);
-    puts("E o jogador 2, que vai comandar o [F]azendeiro, seu [f]ilho e os [c]amponeses?");
+    puts("E o jogador 2, que vai comandar o [" VERD "F" CNZA "]azendeiro, seu [" VERD "f" CNZA "]ilho e os [" VERD "c" CNZA "]amponeses?");
     scanf("%s", nome_jogador2);
 }
 
 void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
     // Imprime em tela o tabuleiro, sendo a matriz de posições + as strings da moldura
-    // Se T[x][y] != '0', putchar. Se == '0', printf("string");
+    // Se T[x][y] != '0', imprima em tela. Se == '0', imprima a string separadora
     int x, y;
     
     // Limpa a tela e printa o cabeçalho
     system("clear");
-    puts("╔═════════════════════════════════════════╗");
-    puts("║     A  B  C  D  E  F  G  H  I  J  K     ║");
+    putchar('\n');
+    puts(CNZA " @╔═════════════════════════════════════════╗");
+    puts(CNZA " @║     "RST"A  "CNZA"B  "RST"C  "CNZA"D  "RST"E  "CNZA"F  "RST"G  "CNZA"H  "RST"I  "CNZA"J  "RST"K     "CNZA"║");
     
     // Para cada linha, se o índice da linha for par ou ímpar, acontece algo diferente
     for (y = 0; y < TAM_Y_TAB; y++) {
@@ -271,50 +283,72 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
             // Linha índice par (y = 0, linha = 1)
             // Imprime as coordenadas numerais da borda esquerda
             if (y < 10) {
-                printf("║  %d [", y+1);
+                printf(CNZA " @║" RST "  %d " CNZA "[", y+1);
             } else {
-                printf("║ %d [", y+1);
+                printf(CNZA " @║" RST " %d " CNZA "[", y+1);
             }
             // Imprime ou uma peça ou um separador
             for (x = 0; x < TAM_X_TAB; x++) {
                 if (T[x][y] != '0') {
-                    putchar(T[x][y]);
+                    //putchar(T[x][y]);
+                    switch(T[x][y]) {
+                        case ' ': putchar(T[x][y]); break;
+
+                        case 'g':
+                        case 'p':
+                        case 'R': printf(VRML "%c", T[x][y]); break;
+
+                        case 'c':
+                        case 'f':
+                        case 'F': printf(VERD "%c", T[x][y]); break;
+                    }
                 } else {
-                    printf("]---[");
+                    printf(CNZA "]---[");
                 }
             }
             if (y < 10) {
-                printf("] %d  ║\n", y+1);
+                printf(CNZA "]" RST " %d  " CNZA "║\n", y+1);
             } else {
-                printf("] %d ║\n", y+1);
+                printf(CNZA "]" RST " %d " CNZA "║\n", y+1);
             }
             if (y < 12) {
-                puts("║     | \\ / | \\ / | \\ / | \\ / | \\ / |     ║");
+                puts(CNZA " @║     | \\ / | \\ / | \\ / | \\ / | \\ / |     ║");
             }
         } else {
             // Linha índice ímpar (y = 1, linha = 2)
             if (y < 9) {
-                printf("║  %d  | [", y+1);                
+                printf(CNZA" @║  %d  | [", y+1);                
             } else {
-                printf("║ %d  | [", y+1);                
+                printf(CNZA" @║ %d  | [", y+1);                
             }
             for (x = 1; x < TAM_X_TAB-1; x++) {
                 if (T[x][y] != '0') {
-                    putchar(T[x][y]);
+                    //putchar(T[x][y]);
+                    switch(T[x][y]) {
+                        case ' ': putchar(T[x][y]); break;
+
+                        case 'g':
+                        case 'p':
+                        case 'R': printf(VRML "%c", T[x][y]); break;
+
+                        case 'c':
+                        case 'f':
+                        case 'F': printf(VERD "%c", T[x][y]); break;
+                    }
                 } else {
-                    printf("] | [");
+                    printf(CNZA"] | [");
                 }
             }
             if (y < 9) {
-                printf("] |  %d  ║\n", y+1);               
+                printf(CNZA "] |  %d  ║\n", y+1);               
             } else {
-                printf("] |  %d ║\n", y+1);               
+                printf(CNZA "] |  %d ║\n", y+1);               
             }
-            puts("║     | / \\ | / \\ | / \\ | / \\ | / \\ |     ║");
+            puts(CNZA " @║     | / \\ | / \\ | / \\ | / \\ | / \\ |     ║");
         }
     }
-    puts("║     A  B  C  D  E  F  G  H  I  J  K     ║");
-    puts("╚═════════════════════════════════════════╝");
+    puts(CNZA " @║     "RST"A  "CNZA"B  "RST"C  "CNZA"D  "RST"E  "CNZA"F  "RST"G  "CNZA"H  "RST"I  "CNZA"J  "RST"K     "CNZA"║");
+    puts(CNZA " @╚═════════════════════════════════════════╝");
     putchar('\n');
 }
 
@@ -326,9 +360,9 @@ void pedir_peca(const int *jog_atual, int peca[], char nome_jogador1[], char nom
 
     // Pede as coordenadas e troca por algo que a matriz entende
     if (*jog_atual == 1) {
-        printf("%s, sua vez!\n", nome_jogador1);
+        printf(VRML "%s, sua vez!\n" CNZA, nome_jogador1);
     } else {
-        printf("%s, sua vez!\n", nome_jogador2);
+        printf(VERD "%s, sua vez!\n" CNZA, nome_jogador2);
     }
     printf("Digite as coordenadas da peça que você quer mover (ex A8): ");
     scanf(" %c", &coord_x_l);
