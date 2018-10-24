@@ -952,8 +952,8 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
     }
 
     // Se todas as posições cardeais de movimento e captura forem 0 ou -1, o movimento da peça é impossível
-    // TODO: adicionar posições cardeais de captura com OR
-    if ((*iN < 1) && (*iS < 1) && (*iE < 1) && (*iO < 1) && (*iNE < 1) && (*iSE < 1) && (*iSO < 1) && (*iNO < 1)) {
+    if (((*iN < 1) && (*iS < 1) && (*iE < 1) && (*iO < 1) && (*iNE < 1) && (*iSE < 1) && (*iSO < 1) && (*iNO < 1))
+        && ((*icN < 1) && (*icS < 1) && (*icE < 1) && (*icO < 1) && (*icNE < 1) && (*icSE < 1) && (*icSO < 1) && (*icNO < 1))) {
         puts("Essa peca nao pode se mover, tente outra...");
         sleep(2);
         return false;
