@@ -432,7 +432,7 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
     cN[x] = peca[x]; cN[y] = (peca[y] - 4);
     cS[x] = peca[x]; cS[y] = (peca[y] + 4);
     cE[x] = (peca[x] + 4); cE[y] = peca[y];
-    cO[x] = (peca[x] - 4); cE[y] = peca[y];
+    cO[x] = (peca[x] - 4); cO[y] = peca[y];
     cNE[x] = (peca[x] + 2); cNE[y] = (peca[y] - 2);
     cSE[x] = (peca[x] + 2); cSE[y] = (peca[y] + 2);
     cSO[x] = (peca[x] - 2); cSO[y] = (peca[y] + 2);
@@ -952,6 +952,7 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
     }
 
     // Se todas as posições cardeais de movimento e captura forem 0 ou -1, o movimento da peça é impossível
+    // TODO: adicionar posições cardeais de captura com OR
     if ((*iN < 1) && (*iS < 1) && (*iE < 1) && (*iO < 1) && (*iNE < 1) && (*iSE < 1) && (*iSO < 1) && (*iNO < 1)) {
         puts("Essa peca nao pode se mover, tente outra...");
         sleep(2);
@@ -1018,7 +1019,6 @@ bool validar_destino(const int peca[], const int dest[], char matriz_posicao[TAM
         sleep(2);
         return false;
     }
-
     // 2ª Parte: validar se o destino não é igual à pelo menos uma das posições de movimento cardeal
     // Se não for de nenhuma coordenada de movimento cardeal, validar se é alguma coordenada de captura
     // Para ser uma captura válida, a cardeal de movimento == -1 e a cardeal de captura == 1
@@ -1031,8 +1031,8 @@ bool validar_destino(const int peca[], const int dest[], char matriz_posicao[TAM
         || (((dest[x] == NE[x]) && (dest[y] == NE[y]) && (*iNE == 1)))
         || (((dest[x] == SE[x]) && (dest[y] == SE[y]) && (*iSE == 1)))
         || (((dest[x] == SO[x]) && (dest[y] == SO[y]) && (*iSO == 1)))
-        || (((dest[x] == NO[x]) && (dest[y] == NO[y]) && (*iNO == 1)))){
-        return true;            
+        || (((dest[x] == NO[x]) && (dest[y] == NO[y]) && (*iNO == 1)))) {
+            return true;            
         } else {
             if ((dest[x] == cN[x]) && (dest[y] == cN[y]) && (*iN == -1) && (*icN == 1)) {
                 capturar_peca(N, matriz_posicao, pecas_jog1, pecas_jog2);
