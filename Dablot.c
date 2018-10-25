@@ -140,12 +140,12 @@ void inicializar_vetor_pecas(char V1[], char V2[]) {
         if (i < 28) {
             V1[i] = 'g';
             V2[i] = 'c';
-        } else  if (i < 29) {
-              V1[i] = 'p';
-              V2[i] = 'f';
-           } else {
-                V1[i] = 'R';
-                V2[i] = 'F';
+        } else if (i < 29) {
+            V1[i] = 'p';
+            V2[i] = 'f';
+        } else {
+            V1[i] = 'R';
+            V2[i] = 'F';
         }
     }
 }
@@ -165,7 +165,7 @@ void inicializar_matriz_posicao(char V1[TAM_VETOR], char V2[TAM_VETOR], char pos
                     pos[x][y] = V1[i];  // Se a linha for par e a coluna for par, coloque a peça do vetor na matriz
                     i++;
                 } else {
-                    pos[x][y] = '0';      // Se a coluna for ímpar, recebe 0
+                    pos[x][y] = '0';    // Se a coluna for ímpar, recebe 0
                 }
             } else {
                 if (x % 2 == 1) {       // Se a linha for ímpar e a coluna for ímpar, coloque a peça do vetor na matriz
@@ -249,14 +249,14 @@ void comecar_jogo(char nome_jogador1[], char nome_jogador2[], bool *game) {
     puts("Começando um novo jogo!");
     *game = true;
     puts("Primeiro vamos conhecer os jogadores...");
-    puts("Qual o nome do jogador 1, que vai comandar o [" VRML "R" CNZA "]ei, o [" VRML "p" CNZA "]ríncipe e os [" VRML "g" CNZA "]uerreiros?");
+    puts("Qual o nome do jogador 1, que vai comandar o [" VRML "R" CNZA "]ei, o [" VRML "p" CNZA "]ríncipe e os [" VRML "g" CNZA "]uerreiros?" VRML);
     fpurge(stdin);
     fgets(nome_jogador1, TAM_NOME, stdin);
     // Ao usar fgets, o caracter \n é adicionado à string. O laço abaixo troca pelo caracter que indica fim de string.
     for (i = 0; i < TAM_NOME; i++) {
         if (nome_jogador1[i] == '\n') nome_jogador1[i] = '\0';
     }
-    puts("E o jogador 2, que vai comandar o [" VERD "F" CNZA "]azendeiro, seu [" VERD "f" CNZA "]ilho e os [" VERD "c" CNZA "]amponeses?");
+    puts(CNZA "E o jogador 2, que vai comandar o [" VERD "F" CNZA "]azendeiro, seu [" VERD "f" CNZA "]ilho e os [" VERD "c" CNZA "]amponeses?" VERD);
     fpurge(stdin);
     fgets(nome_jogador2, TAM_NOME, stdin);
     for (i = 0; i < TAM_NOME; i++) {
@@ -361,6 +361,7 @@ void pedir_peca(const int *jog_atual, int peca[], char nome_jogador1[], char nom
         printf(VERD "%s, sua vez!\n" CNZA, nome_jogador2);
     }
     printf("Digite as coordenadas da peça que você quer mover (ex A8): ");
+    fpurge(stdin);
     scanf(" %c", &coord_x_l);
     scanf("%d", &coord_y);
     coord_x_l = toupper(coord_x_l);
