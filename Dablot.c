@@ -27,11 +27,12 @@
 #define RST  "\x1B[0m"
 
 char menu_inicial(void);
+char menu_pausa(void);
 void inicializar_vetor_pecas(char[*], char[*]);
 void inicializar_matriz_posicao(char[TAM_VETOR], char[TAM_VETOR], char[TAM_X_TAB][TAM_Y_TAB]);
 void comecar_jogo(char[*], char[*], bool*);
 void imprimir_tabuleiro(const char[TAM_X_TAB][TAM_Y_TAB]);
-void pedir_peca(const int*, int[*], char[*], char[*]);
+int pedir_entrada(const int*, int[*], char[*], char[*]);
 bool validar_peca(const int*, const int[*], const char[TAM_X_TAB][TAM_Y_TAB]);
 bool validar_alcance(const int[*], const char[TAM_X_TAB][TAM_Y_TAB], int[*], int[*], int[*], int[*], int[*],
     int[*], int[*], int[*], int*, int*, int*, int*, int*, int*, int*, int*,
@@ -74,11 +75,18 @@ int main(void) {
 
     // Chama o menu inicial. Retorna a escolha do jogador
     switch(menu_inicial()) {
+        //case 'A': puts("Funcao APRENDA A JOGAR ainda nao desenvolvida..."); continue;
+        //case 'C': puts("Funcao CARREGAR JOGO SALVO ainda nao desenvolvida...");
         case 'N':
             comecar_jogo(nome_jogador1, nome_jogador2, &game);
             while (game) {
                 imprimir_tabuleiro(matriz_posicao);
-                pedir_peca(&jog_atual, peca, nome_jogador1, nome_jogador2);
+                if (!pedir_entrada(&jog_atual, peca, nome_jogador1, nome_jogador2)) {
+                    switch(menu_pausa()) {
+                        case 'V': continue;
+                        case 'X': puts("Saindo do jogo..."); exit(EXIT_SUCCESS);
+                    }
+                }
                 if (!validar_peca(&jog_atual, peca, matriz_posicao)) continue;
                 if (!validar_alcance(peca, matriz_posicao, N, S, E, O, NE, SE, SO, NO, &iN, &iS, &iE, &iO, &iNE, &iSE, &iSO, &iNO,
                     cN, cS, cE, cO, cNE, cSE, cSO, cNO, &icN, &icS, &icE, &icO, &icNE, &icSE, &icSO, &icNO)) continue;
@@ -87,21 +95,16 @@ int main(void) {
                     cN, cS, cE, cO, cNE, cSE, cSO, cNO, &icN, &icS, &icE, &icO, &icNE, &icSE, &icSO, &icNO, pecas_jog1, pecas_jog2)) continue;
                 fazer_jogada(matriz_posicao, peca, dest);
                 trocar_turno(&jog_atual);
-                // TODO: colocar a função abaixo num if, se ela retornar 0, deve chamar a função finalizar_jogo()
-                verificar_vetor_pecas(pecas_jog1, pecas_jog2, &jog_atual);
+                // TODO: melhorar a saída do jogo abaixo chamando a função finalizar_jogo() 
+                if (!verificar_vetor_pecas(pecas_jog1, pecas_jog2, &jog_atual)) exit(EXIT_SUCCESS);
             }
-            break;
-        case 'A': puts("Funcao APRENDA A JOGAR ainda nao desenvolvida..."); break;
-        case 'C': puts("Funcao CARREGAR JOGO SALVO ainda nao desenvolvida..."); break;
-        case 'S': puts("Saindo..."); break;
-        default: puts("Opcao invalida...");
+        case 'S': puts("Saindo do jogo...");
     }
     return EXIT_SUCCESS;
 }
 
 char menu_inicial() {
-    char escolha = 'E';
-    bool loop = true;
+    char escolha = '?';
 
     // Limpa a tela e imprime o menu inicial do jogo
     system("clear");
@@ -110,7 +113,7 @@ char menu_inicial() {
     puts(CNZA "   ║" RST " Bem-vindo(a) ao jogo Dablot!" CNZA " ║");
     puts(CNZA "   ╚══════════════════════════════╝");
     putchar('\n');
-    while (loop) {
+    while (escolha == '?') {
         puts(CNZA " ╔══════════════════════════════════╗");
         puts(CNZA " ║" RST " Digite (A) para Aprender a jogar " CNZA "║");
         puts(CNZA " ║" RST "      Digite (I) para Iniciar     " CNZA "║");
@@ -119,14 +122,53 @@ char menu_inicial() {
         putchar('\n');
         scanf(" %c", &escolha);
         escolha = toupper(escolha);
-        if (escolha == 'I') {
-            puts(CNZA " ╔═════════════════════════════════════════════════════╗");
-            puts(CNZA " ║" RST " Deseja um Novo Jogo (N) ou Carregar Jogo Salvo (C)? " CNZA "║");
-            puts(CNZA " ╚═════════════════════════════════════════════════════╝");
-            putchar('\n');
-            scanf(" %c", &escolha);
-            escolha = toupper(escolha);
-            if (escolha == 'N') loop = false;
+        switch(escolha) {
+            case 'I':
+                puts(CNZA " ╔═════════════════════════════════════════════════════╗");
+                puts(CNZA " ║" RST " Deseja um Novo Jogo (N) ou Carregar Jogo Salvo (C)? " CNZA "║");
+                puts(CNZA " ╚═════════════════════════════════════════════════════╝");
+                putchar('\n');
+                scanf(" %c", &escolha);
+                escolha = toupper(escolha);
+                switch(escolha) {
+                    case 'N': return escolha;
+                    case 'C':
+                        puts("Funcao CARREGAR JOGO SALVO ainda nao desenvolvida...");
+                        escolha = '?';
+                        default: escolha = '?'; continue;
+                }
+            case 'S': return escolha;
+            default: escolha = '?'; continue;
+        }
+    }
+    return escolha;
+}
+
+char menu_pausa(void) {
+    char escolha = '?';
+    while (escolha == '?') {
+        system("clear");
+        puts("JOGO PAUSADO");
+        puts("(R) Reiniciar o jogo com os mesmos jogadores");
+        puts("(S) Salvar jogo para continuar depois");
+        puts("(C) Carregar jogo salvo anteriormente");
+        puts("(X) Sair do jogo sem salvar");
+        puts("(V) Voltar ao jogo atual");
+        putchar('\n');
+        fpurge(stdin);
+        scanf(" %c", &escolha);
+        escolha = toupper(escolha);
+        switch(escolha) {
+            case 'R': escolha = '?'; continue;
+            case 'S': escolha = '?'; continue;
+            case 'C': escolha = '?'; continue;
+            case 'X': escolha = 'X'; break;
+            case 'V': escolha = 'V'; break;
+            default:
+                puts("Escolha uma das opcoes...");
+                escolha = '?';
+                sleep(1);
+                continue;
         }
     }
     return escolha;
@@ -348,7 +390,7 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
     putchar('\n');
 }
 
-void pedir_peca(const int *jog_atual, int peca[], char nome_jogador1[], char nome_jogador2[]) {
+int pedir_entrada(const int *jog_atual, int peca[], char nome_jogador1[], char nome_jogador2[]) {
     // coord_x_l = coordenada na forma letra, depois traduzida para forma número
     const int x = 0, y = 1;
     char coord_x_l;
@@ -363,7 +405,6 @@ void pedir_peca(const int *jog_atual, int peca[], char nome_jogador1[], char nom
     printf("Digite as coordenadas da peça que você quer mover (ex A8): ");
     fpurge(stdin);
     scanf(" %c", &coord_x_l);
-    scanf("%d", &coord_y);
     coord_x_l = toupper(coord_x_l);
     switch(coord_x_l) {
         case 'A': coord_x_n = 0; break;
@@ -377,13 +418,16 @@ void pedir_peca(const int *jog_atual, int peca[], char nome_jogador1[], char nom
         case 'I': coord_x_n = 8; break;
         case 'J': coord_x_n = 9; break;
         case 'K': coord_x_n = 10; break;
-        default: coord_x_n = 11;
+        // O case abaixo contempla a chamada do menu_pausa
+        case 'P': return 0;
     }
+    scanf("%d", &coord_y);
     coord_y -= 1;
 
     // Guarda as coordenadas no vetor
     peca[x] = coord_x_n;
     peca[y] = coord_y;
+    return 1;
 }
 
 bool validar_peca(const int *jog_atual, const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_Y_TAB]) {
