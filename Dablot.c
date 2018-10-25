@@ -9,6 +9,7 @@
 #define TAM_X_TAB 11
 #define TAM_Y_TAB 13
 #define TAM_VETOR 30
+#define TAM_NOME 20
 #define LIM_SUPERIOR 0
 #define LIM_INFERIOR 12
 #define LIM_ESQUERDO 0
@@ -50,7 +51,7 @@ int verificar_vetor_pecas(char[*], char[*], int*);
 int main(void) {
     // Variáveis gerais de funcionamento
     bool game = false;
-    char nome_jogador1[20], nome_jogador2[20];
+    char nome_jogador1[TAM_NOME], nome_jogador2[TAM_NOME];
     char matriz_posicao[TAM_X_TAB][TAM_Y_TAB];
     char pecas_jog1[30], pecas_jog2[30];
     int jog_atual = 1;
@@ -95,12 +96,12 @@ int main(void) {
         case 'S': puts("Saindo..."); break;
         default: puts("Opcao invalida...");
     }
-
     return EXIT_SUCCESS;
 }
 
 char menu_inicial() {
     char escolha = 'E';
+    bool loop = true;
 
     // Limpa a tela e imprime o menu inicial do jogo
     system("clear");
@@ -109,28 +110,24 @@ char menu_inicial() {
     puts(CNZA "   ║" RST " Bem-vindo(a) ao jogo Dablot!" CNZA " ║");
     puts(CNZA "   ╚══════════════════════════════╝");
     putchar('\n');
-    while (escolha != 'S') {
+    while (loop) {
         puts(CNZA " ╔══════════════════════════════════╗");
         puts(CNZA " ║" RST " Digite (A) para Aprender a jogar " CNZA "║");
         puts(CNZA " ║" RST "      Digite (I) para Iniciar     " CNZA "║");
         puts(CNZA " ║" RST "       Digite (S) para Sair       " CNZA "║");
         puts(CNZA " ╚══════════════════════════════════╝");
         putchar('\n');
-        fflush(stdin);
-        gets(&escolha);
+        scanf(" %c", &escolha);
         escolha = toupper(escolha);
         if (escolha == 'I') {
-            while ((escolha != 'N' || escolha != 'C')) {
-                puts(CNZA " ╔═════════════════════════════════════════════════════╗");
-                puts(CNZA " ║" RST " Deseja um Novo Jogo (N) ou Carregar Jogo Salvo (C)? " CNZA "║");
-                puts(CNZA " ╚═════════════════════════════════════════════════════╝");
-                fflush(stdin);
-                gets(&escolha);
-                escolha = toupper(escolha);
-                return escolha;
-            }
+            puts(CNZA " ╔═════════════════════════════════════════════════════╗");
+            puts(CNZA " ║" RST " Deseja um Novo Jogo (N) ou Carregar Jogo Salvo (C)? " CNZA "║");
+            puts(CNZA " ╚═════════════════════════════════════════════════════╝");
+            putchar('\n');
+            scanf(" %c", &escolha);
+            escolha = toupper(escolha);
+            if (escolha == 'N') loop = false;
         }
-        return escolha;
     }
     return escolha;
 }
@@ -248,15 +245,23 @@ void inicializar_matriz_posicao(char V1[TAM_VETOR], char V2[TAM_VETOR], char pos
 }
 
 void comecar_jogo(char nome_jogador1[], char nome_jogador2[], bool *game) {
+    int i;
     puts("Começando um novo jogo!");
     *game = true;
     puts("Primeiro vamos conhecer os jogadores...");
     puts("Qual o nome do jogador 1, que vai comandar o [" VRML "R" CNZA "]ei, o [" VRML "p" CNZA "]ríncipe e os [" VRML "g" CNZA "]uerreiros?");
-    fflush(stdin);
-    gets(nome_jogador1);
+    fpurge(stdin);
+    fgets(nome_jogador1, TAM_NOME, stdin);
+    // Ao usar fgets, o caracter \n é adicionado à string. O laço abaixo troca pelo caracter que indica fim de string.
+    for (i = 0; i < TAM_NOME; i++) {
+        if (nome_jogador1[i] == '\n') nome_jogador1[i] = '\0';
+    }
     puts("E o jogador 2, que vai comandar o [" VERD "F" CNZA "]azendeiro, seu [" VERD "f" CNZA "]ilho e os [" VERD "c" CNZA "]amponeses?");
-    fflush(stdin);
-    gets(nome_jogador2);
+    fpurge(stdin);
+    fgets(nome_jogador2, TAM_NOME, stdin);
+    for (i = 0; i < TAM_NOME; i++) {
+        if (nome_jogador2[i] == '\n') nome_jogador2[i] = '\0';
+    }
 }
 
 void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
