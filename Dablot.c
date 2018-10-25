@@ -407,8 +407,6 @@ bool validar_peca(const int *jog_atual, const int peca[], const char matriz_posi
     // Retornar falso se o jogador 1 escolher { F, f, c } ou se o jogador 2 escolher { R, p, g }
     // Retornar falso se qualquer jogador escolher um espaço
 
-    // TODO: trocar o if interno pra switch
-
     if (*jog_atual == 1) {
         if ((matriz_posicao[peca[x]][peca[y]] == 'F') || (matriz_posicao[peca[x]][peca[y]] == 'f') || (matriz_posicao[peca[x]][peca[y]] == 'c')) {
             puts("Voce escolheu uma peca do adversario...");
