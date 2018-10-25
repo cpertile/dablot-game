@@ -153,12 +153,16 @@ char menu_pausa(void) {
     char escolha = '?';
     while (escolha == '?') {
         system("clear");
-        puts("JOGO PAUSADO");
-        puts("(R) Reiniciar o jogo com os mesmos jogadores");
-        puts("(S) Salvar jogo para continuar depois");
-        puts("(C) Carregar jogo salvo anteriormente");
-        puts("(X) Sair do jogo sem salvar");
-        puts("(V) Voltar ao jogo atual");
+        puts(CNZA "                  ╔════════════════╗");
+        puts(CNZA "                  ║" RST "  JOGO PAUSADO  " CNZA "║");
+        puts(CNZA "                  ╚════════════════╝");
+        puts(CNZA "  ╔════════════════════════════════════════════════╗");
+        puts(CNZA "  ║" RST "  (R) Reiniciar o jogo com os mesmos jogadores  " CNZA "║");
+        puts(CNZA "  ║" RST "  (S) Salvar jogo para continuar depois         " CNZA "║");
+        puts(CNZA "  ║" RST "  (C) Carregar jogo salvo anteriormente         " CNZA "║");
+        puts(CNZA "  ║" RST "  (X) Sair do jogo sem salvar                   " CNZA "║");
+        puts(CNZA "  ║" RST "  (V) Voltar ao jogo atual                      " CNZA "║");
+        puts(CNZA "  ╚════════════════════════════════════════════════╝");  
         putchar('\n');
         fpurge(stdin);
         scanf(" %c", &escolha);
