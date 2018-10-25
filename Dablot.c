@@ -331,8 +331,8 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
     // Limpa a tela e printa o cabeçalho
     system("clear");
     putchar('\n');
-    puts(CNZA " @╔═════════════════════════════════════════╗");
-    puts(CNZA " @║     "RST"A  "CNZA"B  "RST"C  "CNZA"D  "RST"E  "CNZA"F  "RST"G  "CNZA"H  "RST"I  "CNZA"J  "RST"K     "CNZA"║");
+    puts(CNZA "  @╔═════════════════════════════════════════╗");
+    puts(CNZA "  @║     "RST"A  "CNZA"B  "RST"C  "CNZA"D  "RST"E  "CNZA"F  "RST"G  "CNZA"H  "RST"I  "CNZA"J  "RST"K     "CNZA"║");
     
     // Para cada linha, se o índice da linha for par ou ímpar, acontece algo diferente
     for (y = 0; y < TAM_Y_TAB; y++) {
@@ -340,9 +340,9 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
             // Linha índice par (y = 0, linha = 1)
             // Imprime as coordenadas numerais da borda esquerda
             if (y < 10) {
-                printf(CNZA " @║" RST "  %d " CNZA "[", y+1);
+                printf(CNZA "  @║" RST "  %d " CNZA "[", y+1);
             } else {
-                printf(CNZA " @║" RST " %d " CNZA "[", y+1);
+                printf(CNZA "  @║" RST " %d " CNZA "[", y+1);
             }
             // Imprime ou uma peça ou um separador
             for (x = 0; x < TAM_X_TAB; x++) {
@@ -368,14 +368,14 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
                 printf(CNZA "]" RST " %d " CNZA "║\n", y+1);
             }
             if (y < 12) {
-                puts(CNZA " @║     | \\ / | \\ / | \\ / | \\ / | \\ / |     ║");
+                puts(CNZA "  @║     | \\ / | \\ / | \\ / | \\ / | \\ / |     ║");
             }
         } else {
             // Linha índice ímpar (y = 1, linha = 2)
             if (y < 9) {
-                printf(CNZA" @║  %d  | [", y+1);                
+                printf(CNZA"  @║  %d  | [", y+1);                
             } else {
-                printf(CNZA" @║ %d  | [", y+1);                
+                printf(CNZA"  @║ %d  | [", y+1);                
             }
             for (x = 1; x < TAM_X_TAB-1; x++) {
                 if (T[x][y] != '0') {
@@ -399,11 +399,11 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
             } else {
                 printf(CNZA "] |  %d ║\n", y+1);               
             }
-            puts(CNZA " @║     | / \\ | / \\ | / \\ | / \\ | / \\ |     ║");
+            puts(CNZA "  @║     | / \\ | / \\ | / \\ | / \\ | / \\ |     ║");
         }
     }
-    puts(CNZA " @║     "RST"A  "CNZA"B  "RST"C  "CNZA"D  "RST"E  "CNZA"F  "RST"G  "CNZA"H  "RST"I  "CNZA"J  "RST"K     "CNZA"║");
-    puts(CNZA " @╚═════════════════════════════════════════╝");
+    puts(CNZA "  @║     "RST"A  "CNZA"B  "RST"C  "CNZA"D  "RST"E  "CNZA"F  "RST"G  "CNZA"H  "RST"I  "CNZA"J  "RST"K     "CNZA"║");
+    puts(CNZA "  @╚═════════════════════════════════════════╝");
     putchar('\n');
 }
 
