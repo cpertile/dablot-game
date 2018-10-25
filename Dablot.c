@@ -31,6 +31,7 @@ char menu_pausa(void);
 void inicializar_vetor_pecas(char[*], char[*]);
 void inicializar_matriz_posicao(char[TAM_VETOR], char[TAM_VETOR], char[TAM_X_TAB][TAM_Y_TAB]);
 void comecar_jogo(char[*], char[*], bool*);
+void reiniciar_jogo(char[TAM_X_TAB][TAM_Y_TAB], char[TAM_VETOR], char[TAM_VETOR]);
 void imprimir_tabuleiro(const char[TAM_X_TAB][TAM_Y_TAB]);
 int pedir_entrada(const int*, int[*], char[*], char[*]);
 bool validar_peca(const int*, const int[*], const char[TAM_X_TAB][TAM_Y_TAB]);
@@ -84,7 +85,8 @@ int main(void) {
                 if (!pedir_entrada(&jog_atual, peca, nome_jogador1, nome_jogador2)) {
                     switch(menu_pausa()) {
                         case 'V': continue;
-                        case 'X': puts("Saindo do jogo..."); exit(EXIT_SUCCESS);
+                        case 'R': reiniciar_jogo(matriz_posicao, pecas_jog1, pecas_jog2); continue;
+                        case 'X': game = false; puts("Saindo do jogo..."); exit(EXIT_SUCCESS);
                     }
                 }
                 if (!validar_peca(&jog_atual, peca, matriz_posicao)) continue;
@@ -96,7 +98,10 @@ int main(void) {
                 fazer_jogada(matriz_posicao, peca, dest);
                 trocar_turno(&jog_atual);
                 // TODO: melhorar a saída do jogo abaixo chamando a função finalizar_jogo() 
-                if (!verificar_vetor_pecas(pecas_jog1, pecas_jog2, &jog_atual)) exit(EXIT_SUCCESS);
+                if (!verificar_vetor_pecas(pecas_jog1, pecas_jog2, &jog_atual)) {
+                    puts("Voce ficou sem movimentos possiveis! Voce perdeu!");
+                    game = false;
+                }
             }
         case 'S': puts("Saindo do jogo...");
     }
@@ -159,7 +164,7 @@ char menu_pausa(void) {
         scanf(" %c", &escolha);
         escolha = toupper(escolha);
         switch(escolha) {
-            case 'R': escolha = '?'; continue;
+            case 'R': escolha = 'R'; break;
             case 'S': escolha = '?'; continue;
             case 'C': escolha = '?'; continue;
             case 'X': escolha = 'X'; break;
@@ -306,6 +311,14 @@ void comecar_jogo(char nome_jogador1[], char nome_jogador2[], bool *game) {
     }
 }
 
+void reiniciar_jogo(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], char pecas_jog1[TAM_VETOR], char pecas_jog2[TAM_VETOR]) {
+    system("clear");
+    puts("Reiniciando jogo, aguarde...");
+    sleep(1);
+    inicializar_vetor_pecas(pecas_jog1, pecas_jog2);
+    inicializar_matriz_posicao(pecas_jog1, pecas_jog2, matriz_posicao);
+}
+
 void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
     // Imprime em tela o tabuleiro, sendo a matriz de posições + as strings da moldura
     // Se T[x][y] != '0', imprima em tela. Se == '0', imprima a string separadora
@@ -402,7 +415,7 @@ int pedir_entrada(const int *jog_atual, int peca[], char nome_jogador1[], char n
     } else {
         printf(VERD "%s, sua vez!\n" CNZA, nome_jogador2);
     }
-    printf("Digite as coordenadas da peça que você quer mover (ex A8): ");
+    printf("Digite as coordenadas (A0) da peça que você quer mover ou (P) para pausar o jogo: ");
     fpurge(stdin);
     scanf(" %c", &coord_x_l);
     coord_x_l = toupper(coord_x_l);
