@@ -116,14 +116,16 @@ char menu_inicial() {
         puts(CNZA " ║" RST "       Digite (S) para Sair       " CNZA "║");
         puts(CNZA " ╚══════════════════════════════════╝");
         putchar('\n');
-        scanf(" %c", &escolha);
+        fflush(stdin);
+        gets(&escolha);
         escolha = toupper(escolha);
         if (escolha == 'I') {
             while ((escolha != 'N' || escolha != 'C')) {
                 puts(CNZA " ╔═════════════════════════════════════════════════════╗");
                 puts(CNZA " ║" RST " Deseja um Novo Jogo (N) ou Carregar Jogo Salvo (C)? " CNZA "║");
                 puts(CNZA " ╚═════════════════════════════════════════════════════╝");
-                scanf(" %c", &escolha);
+                fflush(stdin);
+                gets(&escolha);
                 escolha = toupper(escolha);
                 return escolha;
             }
@@ -250,9 +252,11 @@ void comecar_jogo(char nome_jogador1[], char nome_jogador2[], bool *game) {
     *game = true;
     puts("Primeiro vamos conhecer os jogadores...");
     puts("Qual o nome do jogador 1, que vai comandar o [" VRML "R" CNZA "]ei, o [" VRML "p" CNZA "]ríncipe e os [" VRML "g" CNZA "]uerreiros?");
-    scanf("%s", nome_jogador1);
+    fflush(stdin);
+    gets(nome_jogador1);
     puts("E o jogador 2, que vai comandar o [" VERD "F" CNZA "]azendeiro, seu [" VERD "f" CNZA "]ilho e os [" VERD "c" CNZA "]amponeses?");
-    scanf("%s", nome_jogador2);
+    fflush(stdin);
+    gets(nome_jogador2);
 }
 
 void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
@@ -279,7 +283,6 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
             // Imprime ou uma peça ou um separador
             for (x = 0; x < TAM_X_TAB; x++) {
                 if (T[x][y] != '0') {
-                    //putchar(T[x][y]);
                     switch(T[x][y]) {
                         case ' ': putchar(T[x][y]); break;
 
@@ -312,7 +315,6 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
             }
             for (x = 1; x < TAM_X_TAB-1; x++) {
                 if (T[x][y] != '0') {
-                    //putchar(T[x][y]);
                     switch(T[x][y]) {
                         case ' ': putchar(T[x][y]); break;
 
