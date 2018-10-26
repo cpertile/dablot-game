@@ -302,14 +302,16 @@ void comecar_jogo(char nome_jogador1[], char nome_jogador2[], bool *game) {
     puts("Primeiro vamos conhecer os jogadores...");
     puts("Qual o nome do jogador 1, que vai comandar o [" VRML "R" CNZA "]ei, o [" VRML "p" CNZA "]ríncipe e os [" VRML "g" CNZA "]uerreiros?" VRML);
     fpurge(stdin);
-    fgets(nome_jogador1, TAM_NOME, stdin);
+    fgets(nome_jogador1, sizeof(nome_jogador1), stdin);
     // Ao usar fgets, o caracter \n é adicionado à string. O laço abaixo troca pelo caracter que indica fim de string.
+    // TODO: trocar por while (string[i] != '\0')
+    // TODO: usar strlen (string.h) para achar o '\0'. strlen retorna os validos, o nº que ela retornar eh o indice do '\0'
     for (i = 0; i < TAM_NOME; i++) {
         if (nome_jogador1[i] == '\n') nome_jogador1[i] = '\0';
     }
     puts(CNZA "E o jogador 2, que vai comandar o [" VERD "F" CNZA "]azendeiro, seu [" VERD "f" CNZA "]ilho e os [" VERD "c" CNZA "]amponeses?" VERD);
     fpurge(stdin);
-    fgets(nome_jogador2, TAM_NOME, stdin);
+    fgets(nome_jogador2, sizeof(nome_jogador1), stdin);
     for (i = 0; i < TAM_NOME; i++) {
         if (nome_jogador2[i] == '\n') nome_jogador2[i] = '\0';
     }
@@ -317,8 +319,12 @@ void comecar_jogo(char nome_jogador1[], char nome_jogador2[], bool *game) {
 
 void reiniciar_jogo(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], char pecas_jog1[TAM_VETOR], char pecas_jog2[TAM_VETOR]) {
     system("clear");
-    puts("Reiniciando jogo, aguarde...");
-    sleep(1);
+    printf("Reiniciando jogo, aguarde");
+    int i;
+    for (i = 0; i<3; ++i) {
+        sleep(1);
+        printf(".");    
+    }
     inicializar_vetor_pecas(pecas_jog1, pecas_jog2);
     inicializar_matriz_posicao(pecas_jog1, pecas_jog2, matriz_posicao);
 }
@@ -546,15 +552,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'R':
                 switch(matriz_posicao[N[x]][N[y]]) {
                     case ' ': *iN = 1; break;
-                    case 'F':
-                    case 'f': 
-                    case 'c': *iN = -1;
+                    case 'F': case 'f': case 'c': *iN = -1;
                 }
                 case 'p':
                 switch(matriz_posicao[N[x]][N[y]]) {
                     case ' ': *iN = 1; break;
-                    case 'f': 
-                    case 'c': *iN = -1; break;
+                    case 'f': case 'c': *iN = -1; break;
                 }
                 case 'g':
                 switch(matriz_posicao[N[x]][N[y]]) {
@@ -564,15 +567,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'F':
                 switch(matriz_posicao[N[x]][N[y]]) {
                     case ' ': *iN = 1; break;
-                    case 'R':
-                    case 'p': 
-                    case 'g': *iN = -1; break;
+                    case 'R': case 'p': case 'g': *iN = -1; break;
                 }
                 case 'f':
                 switch(matriz_posicao[N[x]][N[y]]) {
                     case ' ': *iN = 1; break;
-                    case 'p': 
-                    case 'g': *iN = -1; break;
+                    case 'p': case 'g': *iN = -1; break;
                 }
                 case 'c':
                 switch(matriz_posicao[N[x]][N[y]]) {
@@ -586,15 +586,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'R':
                 switch(matriz_posicao[S[x]][S[y]]) {
                     case ' ': *iS = 1; break;
-                    case 'F':
-                    case 'f': 
-                    case 'c': *iS = -1; break;
+                    case 'F': case 'f': case 'c': *iS = -1; break;
                 }
                 case 'p':
                 switch(matriz_posicao[S[x]][S[y]]) {
                     case ' ': *iS = 1; break;
-                    case 'f': 
-                    case 'c': *iS = -1; break;
+                    case 'f': case 'c': *iS = -1; break;
                 }
                 case 'g':
                 switch(matriz_posicao[S[x]][S[y]]) {
@@ -604,15 +601,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'F':
                 switch(matriz_posicao[S[x]][S[y]]) {
                     case ' ': *iS = 1; break;
-                    case 'R':
-                    case 'p': 
-                    case 'g': *iS = -1; break;
+                    case 'R': case 'p': case 'g': *iS = -1; break;
                 }
                 case 'f':
                 switch(matriz_posicao[S[x]][S[y]]) {
                     case ' ': *iS = 1; break;
-                    case 'p': 
-                    case 'g': *iS = -1; break;
+                    case 'p': case 'g': *iS = -1; break;
                 }
                 case 'c':
                 switch(matriz_posicao[S[x]][S[y]]) {
@@ -626,15 +620,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'R':
                 switch(matriz_posicao[E[x]][E[y]]) {
                     case ' ': *iE = 1; break;
-                    case 'F':
-                    case 'f': 
-                    case 'c': *iE = -1; break;
+                    case 'F': case 'f': case 'c': *iE = -1; break;
                 }
                 case 'p':
                 switch(matriz_posicao[E[x]][E[y]]) {
                     case ' ': *iE = 1; break;
-                    case 'f': 
-                    case 'c': *iE = -1; break;
+                    case 'f': case 'c': *iE = -1; break;
                 }
                 case 'g':
                 switch(matriz_posicao[E[x]][E[y]]) {
@@ -644,15 +635,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'F':
                 switch(matriz_posicao[E[x]][E[y]]) {
                     case ' ': *iE = 1; break;
-                    case 'R':
-                    case 'p': 
-                    case 'g': *iE = -1; break;
+                    case 'R': case 'p': case 'g': *iE = -1; break;
                 }
                 case 'f':
                 switch(matriz_posicao[E[x]][E[y]]) {
                     case ' ': *iE = 1; break;
-                    case 'p': 
-                    case 'g': *iE = -1; break;
+                    case 'p': case 'g': *iE = -1; break;
                 }
                 case 'c':
                 switch(matriz_posicao[E[x]][E[y]]) {
@@ -666,15 +654,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'R':
                 switch(matriz_posicao[O[x]][O[y]]) {
                     case ' ': *iO = 1; break;
-                    case 'F':
-                    case 'f': 
-                    case 'c': *iO = -1; break;
+                    case 'F': case 'f': case 'c': *iO = -1; break;
                 }
                 case 'p':
                 switch(matriz_posicao[O[x]][O[y]]) {
                     case ' ': *iO = 1; break;
-                    case 'f': 
-                    case 'c': *iO = -1; break;
+                    case 'f': case 'c': *iO = -1; break;
                 }
                 case 'g':
                 switch(matriz_posicao[O[x]][O[y]]) {
@@ -684,15 +669,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'F':
                 switch(matriz_posicao[O[x]][O[y]]) {
                     case ' ': *iO = 1; break;
-                    case 'R':
-                    case 'p': 
-                    case 'g': *iO = -1; break;
+                    case 'R': case 'p': case 'g': *iO = -1; break;
                 }
                 case 'f':
                 switch(matriz_posicao[O[x]][O[y]]) {
                     case ' ': *iO = 1; break;
-                    case 'p': 
-                    case 'g': *iO = -1; break;
+                    case 'p': case 'g': *iO = -1; break;
                 }
                 case 'c':
                 switch(matriz_posicao[O[x]][O[y]]) {
@@ -706,15 +688,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'R':
                 switch(matriz_posicao[NE[x]][NE[y]]) {
                     case ' ': *iNE = 1; break;
-                    case 'F':
-                    case 'f': 
-                    case 'c': *iNE = -1; break;
+                    case 'F': case 'f': case 'c': *iNE = -1; break;
                 }
                 case 'p':
                 switch(matriz_posicao[NE[x]][NE[y]]) {
                     case ' ': *iNE = 1; break;
-                    case 'f': 
-                    case 'c': *iNE = -1; break;
+                    case 'f': case 'c': *iNE = -1; break;
                 }
                 case 'g':
                 switch(matriz_posicao[NE[x]][NE[y]]) {
@@ -724,15 +703,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'F':
                 switch(matriz_posicao[NE[x]][NE[y]]) {
                     case ' ': *iNE = 1; break;
-                    case 'R':
-                    case 'p': 
-                    case 'g': *iNE = -1; break;
+                    case 'R': case 'p': case 'g': *iNE = -1; break;
                 }
                 case 'f':
                 switch(matriz_posicao[NE[x]][NE[y]]) {
                     case ' ': *iNE = 1; break;
-                    case 'p': 
-                    case 'g': *iNE = -1; break;
+                    case 'p': case 'g': *iNE = -1; break;
                 }
                 case 'c':
                 switch(matriz_posicao[NE[x]][NE[y]]) {
@@ -746,15 +722,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'R':
                 switch(matriz_posicao[SE[x]][SE[y]]) {
                     case ' ': *iSE = 1; break;
-                    case 'F':
-                    case 'f': 
-                    case 'c': *iSE = -1; break;
+                    case 'F': case 'f': case 'c': *iSE = -1; break;
                 }
                 case 'p':
                 switch(matriz_posicao[SE[x]][SE[y]]) {
                     case ' ': *iSE = 1; break;
-                    case 'f': 
-                    case 'c': *iSE = -1; break;
+                    case 'f': case 'c': *iSE = -1; break;
                 }
                 case 'g':
                 switch(matriz_posicao[SE[x]][SE[y]]) {
@@ -764,15 +737,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'F':
                 switch(matriz_posicao[SE[x]][SE[y]]) {
                     case ' ': *iSE = 1; break;
-                    case 'R':
-                    case 'p': 
-                    case 'g': *iSE = -1; break;
+                    case 'R': case 'p': case 'g': *iSE = -1; break;
                 }
                 case 'f':
                 switch(matriz_posicao[SE[x]][SE[y]]) {
                     case ' ': *iSE = 1; break;
-                    case 'p': 
-                    case 'g': *iSE = -1; break;
+                    case 'p': case 'g': *iSE = -1; break;
                 }
                 case 'c':
                 switch(matriz_posicao[SE[x]][SE[y]]) {
@@ -786,15 +756,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'R':
                 switch(matriz_posicao[SO[x]][SO[y]]) {
                     case ' ': *iSO = 1; break;
-                    case 'F':
-                    case 'f': 
-                    case 'c': *iSO = -1; break;
+                    case 'F': case 'f': case 'c': *iSO = -1; break;
                 }
                 case 'p':
                 switch(matriz_posicao[SO[x]][SO[y]]) {
                     case ' ': *iSO = 1; break;
-                    case 'f': 
-                    case 'c': *iSO = -1; break;
+                    case 'f': case 'c': *iSO = -1; break;
                 }
                 case 'g':
                 switch(matriz_posicao[SO[x]][SO[y]]) {
@@ -804,15 +771,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'F':
                 switch(matriz_posicao[SO[x]][SO[y]]) {
                     case ' ': *iSO = 1; break;
-                    case 'R':
-                    case 'p': 
-                    case 'g': *iSO = -1; break;
+                    case 'R': case 'p': case 'g': *iSO = -1; break;
                 }
                 case 'f':
                 switch(matriz_posicao[SO[x]][SO[y]]) {
                     case ' ': *iSO = 1; break;
-                    case 'p': 
-                    case 'g': *iSO = -1; break;
+                    case 'p': case 'g': *iSO = -1; break;
                 }
                 case 'c':
                 switch(matriz_posicao[SO[x]][SO[y]]) {
@@ -826,15 +790,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'R':
                 switch(matriz_posicao[NO[x]][NO[y]]) {
                     case ' ': *iNO = 1; break;
-                    case 'F':
-                    case 'f': 
-                    case 'c': *iNO = -1; break;
+                    case 'F': case 'f': case 'c': *iNO = -1; break;
                 }
                 case 'p':
                 switch(matriz_posicao[NO[x]][NO[y]]) {
                     case ' ': *iNO = 1; break;
-                    case 'f': 
-                    case 'c': *iNO = -1; break;
+                    case 'f': case 'c': *iNO = -1; break;
                 }
                 case 'g':
                 switch(matriz_posicao[NO[x]][NO[y]]) {
@@ -844,15 +805,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'F':
                 switch(matriz_posicao[NO[x]][NO[y]]) {
                     case ' ': *iNO = 1; break;
-                    case 'R':
-                    case 'p': 
-                    case 'g': *iNO = -1; break;
+                    case 'R': case 'p': case 'g': *iNO = -1; break;
                 }
                 case 'f':
                 switch(matriz_posicao[NO[x]][NO[y]]) {
                     case ' ': *iNO = 1; break;
-                    case 'p': 
-                    case 'g': *iNO = -1; break;
+                    case 'p': case 'g': *iNO = -1; break;
                 }
                 case 'c':
                 switch(matriz_posicao[NO[x]][NO[y]]) {
@@ -867,15 +825,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'R':
                 switch(matriz_posicao[NE[x]][NE[y]]) {
                     case ' ': *iNE = 1; break;
-                    case 'F':
-                    case 'f': 
-                    case 'c': *iNE = -1; break;
+                    case 'F': case 'f': case 'c': *iNE = -1; break;
                 }
                 case 'p':
                 switch(matriz_posicao[NE[x]][NE[y]]) {
                     case ' ': *iNE = 1; break;
-                    case 'f': 
-                    case 'c': *iNE = -1; break;
+                    case 'f': case 'c': *iNE = -1; break;
                 }
                 case 'g':
                 switch(matriz_posicao[NE[x]][NE[y]]) {
@@ -885,15 +840,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'F':
                 switch(matriz_posicao[NE[x]][NE[y]]) {
                     case ' ': *iNE = 1; break;
-                    case 'R':
-                    case 'p': 
-                    case 'g': *iNE = -1; break;
+                    case 'R': case 'p': case 'g': *iNE = -1; break;
                 }
                 case 'f':
                 switch(matriz_posicao[NE[x]][NE[y]]) {
                     case ' ': *iNE = 1; break;
-                    case 'p': 
-                    case 'g': *iNE = -1; break;
+                    case 'p': case 'g': *iNE = -1; break;
                 }
                 case 'c':
                 switch(matriz_posicao[NE[x]][NE[y]]) {
@@ -907,15 +859,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'R':
                 switch(matriz_posicao[SE[x]][SE[y]]) {
                     case ' ': *iSE = 1; break;
-                    case 'F':
-                    case 'f': 
-                    case 'c': *iSE = -1; break;
+                    case 'F': case 'f': case 'c': *iSE = -1; break;
                 }
                 case 'p':
                 switch(matriz_posicao[SE[x]][SE[y]]) {
                     case ' ': *iSE = 1; break;
-                    case 'f': 
-                    case 'c': *iSE = -1; break;
+                    case 'f': case 'c': *iSE = -1; break;
                 }
                 case 'g':
                 switch(matriz_posicao[SE[x]][SE[y]]) {
@@ -925,15 +874,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'F':
                 switch(matriz_posicao[SE[x]][SE[y]]) {
                     case ' ': *iSE = 1; break;
-                    case 'R':
-                    case 'p': 
-                    case 'g': *iSE = -1; break;
+                    case 'R': case 'p': case 'g': *iSE = -1; break;
                 }
                 case 'f':
                 switch(matriz_posicao[SE[x]][SE[y]]) {
                     case ' ': *iSE = 1; break;
-                    case 'p': 
-                    case 'g': *iSE = -1; break;
+                    case 'p': case 'g': *iSE = -1; break;
                 }
                 case 'c':
                 switch(matriz_posicao[SE[x]][SE[y]]) {
@@ -947,15 +893,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'R':
                 switch(matriz_posicao[SO[x]][SO[y]]) {
                     case ' ': *iSO = 1; break;
-                    case 'F':
-                    case 'f': 
-                    case 'c': *iSO = -1; break;
+                    case 'F': case 'f': case 'c': *iSO = -1; break;
                 }
                 case 'p':
                 switch(matriz_posicao[SO[x]][SO[y]]) {
                     case ' ': *iSO = 1; break;
-                    case 'f': 
-                    case 'c': *iSO = -1; break;
+                    case 'f': case 'c': *iSO = -1; break;
                 }
                 case 'g':
                 switch(matriz_posicao[SO[x]][SO[y]]) {
@@ -965,15 +908,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'F':
                 switch(matriz_posicao[SO[x]][SO[y]]) {
                     case ' ': *iSO = 1; break;
-                    case 'R':
-                    case 'p': 
-                    case 'g': *iSO = -1; break;
+                    case 'R': case 'p': case 'g': *iSO = -1; break;
                 }
                 case 'f':
                 switch(matriz_posicao[SO[x]][SO[y]]) {
                     case ' ': *iSO = 1; break;
-                    case 'p': 
-                    case 'g': *iSO = -1; break;
+                    case 'p': case 'g': *iSO = -1; break;
                 }
                 case 'c':
                 switch(matriz_posicao[SO[x]][SO[y]]) {
@@ -987,15 +927,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'R':
                 switch(matriz_posicao[NO[x]][NO[y]]) {
                     case ' ': *iNO = 1; break;
-                    case 'F':
-                    case 'f': 
-                    case 'c': *iNO = -1; break;
+                    case 'F': case 'f': case 'c': *iNO = -1; break;
                 }
                 case 'p':
                 switch(matriz_posicao[NO[x]][NO[y]]) {
                     case ' ': *iNO = 1; break;
-                    case 'f': 
-                    case 'c': *iNO = -1; break;
+                    case 'f': case 'c': *iNO = -1; break;
                 }
                 case 'g':
                 switch(matriz_posicao[NO[x]][NO[y]]) {
@@ -1005,15 +942,12 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
                 case 'F':
                 switch(matriz_posicao[NO[x]][NO[y]]) {
                     case ' ': *iNO = 1; break;
-                    case 'R':
-                    case 'p': 
-                    case 'g': *iNO = -1; break;
+                    case 'R': case 'p': case 'g': *iNO = -1; break;
                 }
                 case 'f':
                 switch(matriz_posicao[NO[x]][NO[y]]) {
                     case ' ': *iNO = 1; break;
-                    case 'p': 
-                    case 'g': *iNO = -1; break;
+                    case 'p': case 'g': *iNO = -1; break;
                 }
                 case 'c':
                 switch(matriz_posicao[NO[x]][NO[y]]) {
