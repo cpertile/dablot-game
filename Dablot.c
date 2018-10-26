@@ -9,7 +9,7 @@
 #define TAM_X_TAB 11
 #define TAM_Y_TAB 13
 #define TAM_VETOR 30
-#define TAM_NOME 20
+#define TAM_NOME 30
 #define LIM_SUPERIOR 0
 #define LIM_INFERIOR 12
 #define LIM_ESQUERDO 0
@@ -28,10 +28,10 @@
 
 char menu_inicial(void);
 char menu_pausa(void);
-void inicializar_vetor_pecas(char[*], char[*]);
-void inicializar_matriz_posicao(char[TAM_VETOR], char[TAM_VETOR], char[TAM_X_TAB][TAM_Y_TAB]);
+void inicializar_vetor_pecas(char[*], char[*], size_t);
+void inicializar_matriz_posicao(char[*], char[*], size_t, char[TAM_X_TAB][TAM_Y_TAB]);
 void comecar_jogo(char[*], char[*], bool*);
-void reiniciar_jogo(char[TAM_X_TAB][TAM_Y_TAB], char[TAM_VETOR], char[TAM_VETOR]);
+void reiniciar_jogo(char[TAM_X_TAB][TAM_Y_TAB], char[*], char[*], size_t);
 void imprimir_tabuleiro(const char[TAM_X_TAB][TAM_Y_TAB]);
 int pedir_entrada(const int*, int[*], char[*], char[*]);
 bool validar_peca(const int*, const int[*], const char[TAM_X_TAB][TAM_Y_TAB]);
@@ -47,7 +47,7 @@ bool validar_destino(const int[*], const int[*], char[TAM_X_TAB][TAM_Y_TAB], int
 void capturar_peca(int[*], char[TAM_X_TAB][TAM_Y_TAB], char[*], char[*]);
 void fazer_jogada(char[TAM_X_TAB][TAM_Y_TAB], const int[*], const int [*]);
 void trocar_turno(int*);
-int verificar_vetor_pecas(char[*], char[*], int*);
+int verificar_vetor_pecas(char[*], char[*], size_t, int*);
 
 
 int main(void) {
@@ -68,10 +68,10 @@ int main(void) {
     int icN = 0, icS = 0, icE = 0, icO = 0, icNE = 0, icSE = 0, icSO = 0, icNO = 0;
 
     // Inicialização dos vetores peças (vetor, nº do jogador)
-    inicializar_vetor_pecas(pecas_jog1, pecas_jog2);
+    inicializar_vetor_pecas(pecas_jog1, pecas_jog2, TAM_VETOR);
 
     // Colocando as peças na matriz de posições (vetor jogador 1, vetor jogador 2 e matriz posição)
-    inicializar_matriz_posicao(pecas_jog1, pecas_jog2, matriz_posicao);
+    inicializar_matriz_posicao(pecas_jog1, pecas_jog2, TAM_VETOR, matriz_posicao);
     
 
     // Chama o menu inicial. Retorna a escolha do jogador
@@ -85,7 +85,7 @@ int main(void) {
                 if (!pedir_entrada(&jog_atual, peca, nome_jogador1, nome_jogador2)) {
                     switch(menu_pausa()) {
                         case 'V': continue;
-                        case 'R': reiniciar_jogo(matriz_posicao, pecas_jog1, pecas_jog2); continue;
+                        case 'R': reiniciar_jogo(matriz_posicao, pecas_jog1, pecas_jog2, TAM_VETOR); continue;
                         case 'X': game = false; puts("Saindo do jogo..."); exit(EXIT_SUCCESS);
                     }
                 }
@@ -98,7 +98,7 @@ int main(void) {
                 fazer_jogada(matriz_posicao, peca, dest);
                 trocar_turno(&jog_atual);
                 // TODO: melhorar a saída do jogo abaixo chamando a função finalizar_jogo() 
-                if (!verificar_vetor_pecas(pecas_jog1, pecas_jog2, &jog_atual)) {
+                if (!verificar_vetor_pecas(pecas_jog1, pecas_jog2, TAM_VETOR, &jog_atual)) {
                     puts("Voce ficou sem movimentos possiveis! Voce perdeu!");
                     game = false;
                 }
@@ -156,13 +156,13 @@ char menu_pausa(void) {
         puts(CNZA "                  ╔════════════════╗");
         puts(CNZA "                  ║" RST "  JOGO PAUSADO  " CNZA "║");
         puts(CNZA "                  ╚════════════════╝");
-        puts(CNZA "  ╔════════════════════════════════════════════════╗");
-        puts(CNZA "  ║" RST "  (R) Reiniciar o jogo com os mesmos jogadores  " CNZA "║");
-        puts(CNZA "  ║" RST "  (S) Salvar jogo para continuar depois         " CNZA "║");
-        puts(CNZA "  ║" RST "  (C) Carregar jogo salvo anteriormente         " CNZA "║");
-        puts(CNZA "  ║" RST "  (X) Sair do jogo sem salvar                   " CNZA "║");
-        puts(CNZA "  ║" RST "  (V) Voltar ao jogo atual                      " CNZA "║");
-        puts(CNZA "  ╚════════════════════════════════════════════════╝");  
+        puts(CNZA "  ╔═════════════════════════════════════════════════╗");
+        puts(CNZA "  ║" RST "  (R) Reiniciar partida com os mesmos jogadores  " CNZA "║");
+        puts(CNZA "  ║" RST "  (S) Salvar jogo para continuar depois          " CNZA "║");
+        puts(CNZA "  ║" RST "  (C) Carregar jogo salvo anteriormente          " CNZA "║");
+        puts(CNZA "  ║" RST "  (X) Sair da partida e recomeçar                " CNZA "║");
+        puts(CNZA "  ║" RST "  (V) Voltar ao jogo atual                       " CNZA "║");
+        puts(CNZA "  ╚═════════════════════════════════════════════════╝");  
         putchar('\n');
         fpurge(stdin);
         scanf(" %c", &escolha);
@@ -183,15 +183,15 @@ char menu_pausa(void) {
     return escolha;
 }
 
-void inicializar_vetor_pecas(char V1[], char V2[]) {
+void inicializar_vetor_pecas(char V1[], char V2[], size_t tam) {
     // Preenche o vetor passado com as peças correspondentes ao jogador 1 ou 2
     int i;
 
-    for (i = 0; i < 30; ++i) {
-        if (i < 28) {
+    for (i = 0; i < tam; ++i) {
+        if (i < tam-2) {
             V1[i] = 'g';
             V2[i] = 'c';
-        } else if (i < 29) {
+        } else if (i < tam-1) {
             V1[i] = 'p';
             V2[i] = 'f';
         } else {
@@ -201,7 +201,7 @@ void inicializar_vetor_pecas(char V1[], char V2[]) {
     }
 }
 
-void inicializar_matriz_posicao(char V1[TAM_VETOR], char V2[TAM_VETOR], char pos[TAM_X_TAB][TAM_Y_TAB]) {
+void inicializar_matriz_posicao(char V1[], char V2[], size_t tam, char pos[TAM_X_TAB][TAM_Y_TAB]) {
     // Preenche as posições com as peças
     // Linhas pares = colunas pares
     // Linhas ímpares = colunas ímpares
@@ -257,7 +257,7 @@ void inicializar_matriz_posicao(char V1[TAM_VETOR], char V2[TAM_VETOR], char pos
             pos[x][5] = '0';
         } else {
             if (x == 1) {
-                pos[x][5] = V1[28];
+                pos[x][5] = V1[tam-2];
             } else {
                 pos[x][5] = ' ';            
             }
@@ -271,9 +271,9 @@ void inicializar_matriz_posicao(char V1[TAM_VETOR], char V2[TAM_VETOR], char pos
             pos[x][6] = '0';
         } else {
             if (x == 0) {
-                pos[x][6] = V1[29];
+                pos[x][6] = V1[tam-1];
             } else if (x == 10) {
-                pos[x][6] = V2[29];
+                pos[x][6] = V2[tam-1];
             } else {
                 pos[x][6] = ' ';            
             }
@@ -287,7 +287,7 @@ void inicializar_matriz_posicao(char V1[TAM_VETOR], char V2[TAM_VETOR], char pos
             pos[x][7] = '0';
         } else {
             if (x == 9) {
-                pos[x][7] = V2[28];
+                pos[x][7] = V2[tam-2];
             } else {
                 pos[x][7] = ' ';
             }
@@ -303,7 +303,6 @@ void comecar_jogo(char nome_jogador1[], char nome_jogador2[], bool *game) {
     fpurge(stdin);
     fgets(nome_jogador1, TAM_NOME, stdin);
     // Ao usar fgets, o caracter \n é adicionado à string. O laço abaixo troca pelo caracter que indica fim de string.
-    // TODO: trocar por while (string[i] != '\n')
     int i;
     for (i = 0; i < TAM_NOME; i++) {
         if (nome_jogador1[i] == '\n') {
@@ -323,16 +322,16 @@ void comecar_jogo(char nome_jogador1[], char nome_jogador2[], bool *game) {
     }
 }
 
-void reiniciar_jogo(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], char pecas_jog1[TAM_VETOR], char pecas_jog2[TAM_VETOR]) {
+void reiniciar_jogo(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], char pecas_jog1[], char pecas_jog2[], size_t tam) {
     system("clear");
     printf("Reiniciando jogo, aguarde");
     int i;
     for (i = 0; i<3; ++i) {
         sleep(1);
-        printf(".");    
+        printf(".");
     }
-    inicializar_vetor_pecas(pecas_jog1, pecas_jog2);
-    inicializar_matriz_posicao(pecas_jog1, pecas_jog2, matriz_posicao);
+    inicializar_vetor_pecas(pecas_jog1, pecas_jog2, TAM_VETOR);
+    inicializar_matriz_posicao(pecas_jog1, pecas_jog2, TAM_VETOR, matriz_posicao);
 }
 
 void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
@@ -1168,10 +1167,10 @@ void trocar_turno(int *jog_atual) {
     }
 }
 
-int verificar_vetor_pecas(char pecas_jog1[], char pecas_jog2[], int *jog_atual) {
+int verificar_vetor_pecas(char pecas_jog1[], char pecas_jog2[], size_t tam, int *jog_atual) {
     int i;
     int perdedor = 0;
-    for (i = 0; i < 30; ++i) {
+    for (i = 0; i < tam; ++i) {
         if (*jog_atual == 1) {
             if (pecas_jog1[i] != ' ') {
                 return 1;
