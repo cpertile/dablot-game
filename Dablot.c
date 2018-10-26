@@ -31,7 +31,7 @@ char menu_pausa(void);
 void inicializar_vetor_pecas(char[*], char[*], size_t);
 void inicializar_matriz_posicao(char[*], char[*], size_t, char[TAM_X_TAB][TAM_Y_TAB]);
 void comecar_jogo(char[*], char[*], bool*);
-void reiniciar_jogo(char[TAM_X_TAB][TAM_Y_TAB], char[*], char[*], size_t);
+void reiniciar_partida(char[TAM_X_TAB][TAM_Y_TAB], char[*], char[*], size_t);
 void imprimir_tabuleiro(const char[TAM_X_TAB][TAM_Y_TAB]);
 int pedir_entrada(const int*, int[*], char[*], char[*]);
 bool validar_peca(const int*, const int[*], const char[TAM_X_TAB][TAM_Y_TAB]);
@@ -85,8 +85,8 @@ int main(void) {
                 if (!pedir_entrada(&jog_atual, peca, nome_jogador1, nome_jogador2)) {
                     switch(menu_pausa()) {
                         case 'V': continue;
-                        case 'R': reiniciar_jogo(matriz_posicao, pecas_jog1, pecas_jog2, TAM_VETOR); continue;
-                        case 'X': game = false; puts("Saindo do jogo..."); exit(EXIT_SUCCESS);
+                        case 'R': reiniciar_partida(matriz_posicao, pecas_jog1, pecas_jog2, TAM_VETOR); continue;
+                        case 'X': reiniciar_partida(matriz_posicao, pecas_jog1, pecas_jog2, TAM_VETOR); comecar_jogo(nome_jogador1, nome_jogador2, &game); continue;
                     }
                 }
                 if (!validar_peca(&jog_atual, peca, matriz_posicao)) continue;
@@ -296,8 +296,8 @@ void inicializar_matriz_posicao(char V1[], char V2[], size_t tam, char pos[TAM_X
 }
 
 void comecar_jogo(char nome_jogador1[], char nome_jogador2[], bool *game) {
-    puts("Começando um novo jogo!");
     *game = true;
+    puts("Começando um novo jogo!");
     puts("Primeiro vamos conhecer os jogadores...");
     puts("Qual o nome do jogador 1, que vai comandar o [" VRML "R" CNZA "]ei, o [" VRML "p" CNZA "]ríncipe e os [" VRML "g" CNZA "]uerreiros?" VRML);
     fpurge(stdin);
@@ -322,14 +322,10 @@ void comecar_jogo(char nome_jogador1[], char nome_jogador2[], bool *game) {
     }
 }
 
-void reiniciar_jogo(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], char pecas_jog1[], char pecas_jog2[], size_t tam) {
+void reiniciar_partida(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], char pecas_jog1[], char pecas_jog2[], size_t tam) {
     system("clear");
-    printf("Reiniciando jogo, aguarde");
-    int i;
-    for (i = 0; i<3; ++i) {
-        sleep(1);
-        printf(".");
-    }
+    puts("Reiniciando, aguarde...");
+    sleep(1);
     inicializar_vetor_pecas(pecas_jog1, pecas_jog2, TAM_VETOR);
     inicializar_matriz_posicao(pecas_jog1, pecas_jog2, TAM_VETOR, matriz_posicao);
 }
@@ -989,7 +985,7 @@ void pedir_destino(int dest[]) {
     char coord_x_l_dest;
     int coord_x_n_dest, coord_y_dest;
 
-    printf("Digite as coordenadas de destino: (ex C11): ");
+    printf("Digite as coordenadas de destino: ");
     scanf(" %c", &coord_x_l_dest);
     scanf("%d", &coord_y_dest);
     coord_x_l_dest = toupper(coord_x_l_dest);
