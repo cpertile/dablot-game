@@ -296,24 +296,30 @@ void inicializar_matriz_posicao(char V1[TAM_VETOR], char V2[TAM_VETOR], char pos
 }
 
 void comecar_jogo(char nome_jogador1[], char nome_jogador2[], bool *game) {
-    int i;
     puts("Começando um novo jogo!");
     *game = true;
     puts("Primeiro vamos conhecer os jogadores...");
     puts("Qual o nome do jogador 1, que vai comandar o [" VRML "R" CNZA "]ei, o [" VRML "p" CNZA "]ríncipe e os [" VRML "g" CNZA "]uerreiros?" VRML);
     fpurge(stdin);
-    fgets(nome_jogador1, sizeof(nome_jogador1), stdin);
+    fgets(nome_jogador1, TAM_NOME, stdin);
     // Ao usar fgets, o caracter \n é adicionado à string. O laço abaixo troca pelo caracter que indica fim de string.
-    // TODO: trocar por while (string[i] != '\0')
-    // TODO: usar strlen (string.h) para achar o '\0'. strlen retorna os validos, o nº que ela retornar eh o indice do '\0'
+    // TODO: trocar por while (string[i] != '\n')
+    int i;
     for (i = 0; i < TAM_NOME; i++) {
-        if (nome_jogador1[i] == '\n') nome_jogador1[i] = '\0';
+        if (nome_jogador1[i] == '\n') {
+            nome_jogador1[i] = '\0';
+            break;
+        }
     }
     puts(CNZA "E o jogador 2, que vai comandar o [" VERD "F" CNZA "]azendeiro, seu [" VERD "f" CNZA "]ilho e os [" VERD "c" CNZA "]amponeses?" VERD);
     fpurge(stdin);
-    fgets(nome_jogador2, sizeof(nome_jogador1), stdin);
+    fgets(nome_jogador2, TAM_NOME, stdin);
+    i = 0;
     for (i = 0; i < TAM_NOME; i++) {
-        if (nome_jogador2[i] == '\n') nome_jogador2[i] = '\0';
+        if (nome_jogador2[i] == '\n') {
+            nome_jogador2[i] = '\0';
+            break;
+        }
     }
 }
 
@@ -355,14 +361,8 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
                 if (T[x][y] != '0') {
                     switch(T[x][y]) {
                         case ' ': putchar(T[x][y]); break;
-
-                        case 'g':
-                        case 'p':
-                        case 'R': printf(VRML "%c", T[x][y]); break;
-
-                        case 'c':
-                        case 'f':
-                        case 'F': printf(VERD "%c", T[x][y]); break;
+                        case 'g': case 'p': case 'R': printf(VRML "%c", T[x][y]); break;
+                        case 'c': case 'f': case 'F': printf(VERD "%c", T[x][y]); break;
                     }
                 } else {
                     printf(CNZA "]---[");
@@ -387,14 +387,8 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
                 if (T[x][y] != '0') {
                     switch(T[x][y]) {
                         case ' ': putchar(T[x][y]); break;
-
-                        case 'g':
-                        case 'p':
-                        case 'R': printf(VRML "%c", T[x][y]); break;
-
-                        case 'c':
-                        case 'f':
-                        case 'F': printf(VERD "%c", T[x][y]); break;
+                        case 'g': case 'p': case 'R': printf(VRML "%c", T[x][y]); break;
+                        case 'c': case 'f': case 'F': printf(VERD "%c", T[x][y]); break;
                     }
                 } else {
                     printf(CNZA"] | [");
