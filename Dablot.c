@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <string.h>
 
 #define TAM_X_TAB 11
 #define TAM_Y_TAB 13
@@ -48,6 +49,7 @@ void capturar_peca(int[*], char[TAM_X_TAB][TAM_Y_TAB], char[*], char[*]);
 void fazer_jogada(char[TAM_X_TAB][TAM_Y_TAB], const int[*], const int [*]);
 void trocar_turno(int*);
 int verificar_vetor_pecas(char[*], char[*], size_t, int*);
+int salvar_jogo(char[TAM_X_TAB][TAM_Y_TAB], char[*], char[*], char[*], char[*], size_t);
 
 
 int main(void) {
@@ -85,6 +87,7 @@ int main(void) {
                 if (!pedir_entrada(&jog_atual, peca, nome_jogador1, nome_jogador2)) {
                     switch(menu_pausa()) {
                         case 'V': continue;
+                        case 'S': salvar_jogo(matriz_posicao, nome_jogador1, pecas_jog1, nome_jogador2, pecas_jog2, TAM_VETOR); continue;
                         case 'R': reiniciar_partida(matriz_posicao, pecas_jog1, pecas_jog2, TAM_VETOR); continue;
                         case 'X': reiniciar_partida(matriz_posicao, pecas_jog1, pecas_jog2, TAM_VETOR); comecar_jogo(nome_jogador1, nome_jogador2, &game); continue;
                     }
@@ -97,7 +100,6 @@ int main(void) {
                     cN, cS, cE, cO, cNE, cSE, cSO, cNO, &icN, &icS, &icE, &icO, &icNE, &icSE, &icSO, &icNO, pecas_jog1, pecas_jog2)) continue;
                 fazer_jogada(matriz_posicao, peca, dest);
                 trocar_turno(&jog_atual);
-                // TODO: melhorar a saída do jogo abaixo chamando a função finalizar_jogo() 
                 if (!verificar_vetor_pecas(pecas_jog1, pecas_jog2, TAM_VETOR, &jog_atual)) {
                     puts("Voce ficou sem movimentos possiveis! Voce perdeu!");
                     game = false;
@@ -169,7 +171,7 @@ char menu_pausa(void) {
         escolha = toupper(escolha);
         switch(escolha) {
             case 'R': escolha = 'R'; break;
-            case 'S': escolha = '?'; continue;
+            case 'S': escolha = 'S'; break;
             case 'C': escolha = '?'; continue;
             case 'X': escolha = 'X'; break;
             case 'V': escolha = 'V'; break;
@@ -1186,4 +1188,48 @@ int verificar_vetor_pecas(char pecas_jog1[], char pecas_jog2[], size_t tam, int 
     printf("O jogador %d ficou sem pecas e perdeu! Fim de jogo!\n", perdedor);
     sleep(2);
     return 0;
+}
+
+int salvar_jogo(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], char nome_jogador1[], char pecas_jog1[], char nome_jogador2[], char pecas_jog2[], size_t tam) {
+    // TODO: Verificar se o arquivo existe, e se existir confirmar sobreescrever
+    char nome_arquivo[34];
+    char caractere_matriz;
+
+    printf("Escolha um nome para o arquivo de jogo salvo: ");
+    fpurge(stdin);
+    fgets(nome_arquivo, 29, stdin);
+    int i, j;
+    for (i = 0; i < 29; i++) {
+        if (nome_arquivo[i] == '\n') {
+            nome_arquivo[i] = '\0';
+            break;
+        }
+    }
+    strcat(nome_arquivo, ".txt");
+    FILE * stream = fopen(nome_arquivo, "w");
+    if (stream == 0) {
+        perror("ERRO: nao foi possivel criar o arquivo...");
+        return EXIT_FAILURE;
+    }
+
+    // Salva a matriz da forma que o computador enxerga
+    for (j = 0; j < TAM_Y_TAB; ++j) {
+        for (i = 0; i < TAM_X_TAB; ++i) {
+            caractere_matriz = matriz_posicao[i][j];
+            fprintf(stream, "%c", caractere_matriz);
+        }
+        caractere_matriz = '\n';
+        fprintf(stream, "%c", caractere_matriz);
+    }
+    
+    // Salva os nomes dos jogadores e seus vetores de peças
+    fprintf(stream, "%s\n", nome_jogador1);
+    fprintf(stream, "%s\n", pecas_jog1);
+    fprintf(stream, "%s\n", nome_jogador2);
+    fprintf(stream, "%s\n", pecas_jog2);
+
+    fclose(stream);
+    puts("Jogo salvo com sucesso...");
+    sleep(1);
+    return EXIT_SUCCESS;
 }
