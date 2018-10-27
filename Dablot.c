@@ -1209,7 +1209,7 @@ int salvar_jogo(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], char nome_jogador1[],
     FILE * stream = fopen(nome_arquivo, "w");
     if (stream == 0) {
         perror("ERRO: nao foi possivel criar o arquivo...");
-        return EXIT_FAILURE;
+        return 0;
     }
 
     // Salva a matriz da forma que o computador enxerga
@@ -1231,5 +1231,5 @@ int salvar_jogo(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], char nome_jogador1[],
     fclose(stream);
     puts("Jogo salvo com sucesso...");
     sleep(1);
-    return EXIT_SUCCESS;
+    return 1;
 }
