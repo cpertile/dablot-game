@@ -57,8 +57,8 @@ void trocar_turno(int*);
 int main(void) {
     // Variáveis gerais de funcionamento
     bool game = false;
-    char nome_jogador1[TAM_NOME], nome_jogador2[TAM_NOME];
     char matriz_posicao[TAM_X_TAB][TAM_Y_TAB];
+    char nome_jogador1[TAM_NOME], nome_jogador2[TAM_NOME];
     char pecas_jog1[TAM_VETOR], pecas_jog2[TAM_VETOR];
     int jog_atual = sortear_jogador();
     int peca[2], dest[2];
