@@ -1,12 +1,12 @@
 // Dablot v 0.7.0
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <ctype.h>
 #include <stdbool.h>
-#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #define TAM_X_TAB 11
 #define TAM_Y_TAB 13
