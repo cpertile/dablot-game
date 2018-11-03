@@ -7,6 +7,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include "pontoCardeal.h"
 
 #define TAM_X_TAB 11
 #define TAM_Y_TAB 13
@@ -17,25 +18,19 @@
 #define LIM_ESQUERDO 0
 #define LIM_DIREITO 10
 
-#define VRML "\x1B[91m"
-#define VERD "\x1B[32m"
 #define AMRL "\x1B[33m"
 #define AZUL "\x1B[34m"
-#define MGNT "\x1B[95m" 
-#define CIAN "\x1B[96m"
-#define BNCO "\x1B[37m"
-#define CNZA "\x1B[90m"
 #define BCPT "\x1B[30;47m"
+#define BNCO "\x1B[37m"
+#define CIAN "\x1B[96m"
+#define CNZA "\x1B[90m"
+#define MGNT "\x1B[95m" 
+#define VERD "\x1B[32m"
+#define VRML "\x1B[91m"
 #define RST  "\x1B[0m"
 
-bool validar_alcance(const int[*], const char[TAM_X_TAB][TAM_Y_TAB], int[*], int[*], int[*], int[*], int[*],
-    int[*], int[*], int[*], int*, int*, int*, int*, int*, int*, int*, int*,
-    int[*], int[*], int[*], int[*], int[*],
-    int[*], int[*], int[*], int*, int*, int*, int*, int*, int*, int*, int*);
-bool validar_destino(const int[*], const int[*], char[TAM_X_TAB][TAM_Y_TAB], int[*], int[*], int[*], int[*], int[*],
-    int[*], int[*], int[*], int*, int*, int*, int*, int*, int*, int*, int*,
-    int[*], int[*], int[*], int[*], int[*],
-    int[*], int[*], int[*], int*, int*, int*, int*, int*, int*, int*, int*, char[*], char[*]);
+bool validar_alcance(const int[*], const char[TAM_X_TAB][TAM_Y_TAB], pontoCardeal*, pontoCardeal*);
+bool validar_destino(const int[*], const int[*], char[TAM_X_TAB][TAM_Y_TAB], pontoCardeal, pontoCardeal, char[*], char[*]);
 bool validar_peca(const int*, const int[*], const char[TAM_X_TAB][TAM_Y_TAB]);
 char menu_inicial(void);
 char menu_pausa(void);
@@ -63,13 +58,9 @@ int main(void) {
     int jog_atual = sortear_jogador();
     int peca[2], dest[2];
 
-    // Posições cardeais de movimento e seus índices
-    int N[2], S[2], E[2], O[2], NE[2], SE[2], SO[2], NO[2];
-    int iN = 0, iS = 0, iE = 0, iO = 0, iNE = 0, iSE = 0, iSO = 0, iNO = 0;
-
-    // Posições cardeais de captura e seus índices
-    int cN[2], cS[2], cE[2], cO[2], cNE[2], cSE[2], cSO[2], cNO[2];
-    int icN = 0, icS = 0, icE = 0, icO = 0, icNE = 0, icSE = 0, icSO = 0, icNO = 0;
+    // Posições cardeais de movimento e captura
+    pontoCardeal movimento;
+    pontoCardeal captura;
 
     // Inicialização dos vetores peças
     inicializar_vetor_pecas(pecas_jog1, pecas_jog2, TAM_VETOR);
@@ -107,13 +98,11 @@ int main(void) {
                 }
                 if (!validar_peca(&jog_atual, peca, matriz_posicao)) continue;
 
-                if (!validar_alcance(peca, matriz_posicao, N, S, E, O, NE, SE, SO, NO, &iN, &iS, &iE, &iO, &iNE, &iSE, &iSO, &iNO,
-                    cN, cS, cE, cO, cNE, cSE, cSO, cNO, &icN, &icS, &icE, &icO, &icNE, &icSE, &icSO, &icNO)) continue;
+                if (!validar_alcance(peca, matriz_posicao, &movimento, &captura)) continue;
 
                 pedir_destino(dest);
 
-                if (!validar_destino(peca, dest, matriz_posicao, N, S, E, O, NE, SE, SO, NO, &iN, &iS, &iE, &iO, &iNE, &iSE, &iSO, &iNO,
-                    cN, cS, cE, cO, cNE, cSE, cSO, cNO, &icN, &icS, &icE, &icO, &icNE, &icSE, &icSO, &icNO, pecas_jog1, pecas_jog2)) continue;
+                if (!validar_destino(peca, dest, matriz_posicao, movimento, captura, pecas_jog1, pecas_jog2)) continue;
                 
                 fazer_jogada(matriz_posicao, peca, dest);
 
@@ -127,6 +116,14 @@ int main(void) {
         case 'S': puts("Saindo do jogo...");
     }
     return EXIT_SUCCESS;
+}
+
+bool verificar_pecas_livres() {
+    // Receber a matriz, o jogador atual e seu vetor de peças
+    // Rodar a função verificar_alcance() num loop para todas as peças
+    // Caso verificar_alcance() retorne verdadeiro, sair do laço e retornar verdadeiro
+    // Caso verificar_alcance() retorne falso, continuar verificando até chegar na última peça
+    // Caso a última também retorne falso, todas as peças estão bloqueadas, retornar falso, esse jogador perdeu o jogo
 }
 
 int sortear_jogador(void) {
@@ -358,6 +355,7 @@ void reiniciar_partida(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], char pecas_jog
 void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
     // Imprime em tela o tabuleiro, sendo a matriz de posições + as strings da moldura
     // Se T[x][y] != '0', imprima em tela. Se == '0', imprima a string separadora
+    // TODO: Usar %2d nos números para alinhas corretamente
     int x, y;
     
     // Limpa a tela e printa o cabeçalho
@@ -516,10 +514,8 @@ bool validar_peca(const int *jog_atual, const int peca[], const char matriz_posi
     return true;
 }
 
-bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], int N[], int S[], int E[], int O[], int NE[],
-    int SE[], int SO[], int NO[], int *iN, int *iS, int *iE, int *iO, int *iNE, int *iSE, int *iSO, int *iNO, 
-    int cN[], int cS[], int cE[], int cO[], int cNE[],
-    int cSE[], int cSO[], int cNO[], int *icN, int *icS, int *icE, int *icO, int *icNE, int *icSE, int *icSO, int *icNO) {
+bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], pontoCardeal * movimento, pontoCardeal * captura) {
+    // TODO: Criar struct pontos_cardeais; pontos_subcardeais (?)
     const int x = 0, y = 1;
     // Retornar true se a peça pode se mover. Se ela não puder, retornar mensagem de erro e false
 
@@ -532,28 +528,28 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
     // Peças em linhas ímpares têm 4 posições de movimento e de captura
 
     // Posições cardeais de movimento
-    N[x] = peca[x]; N[y] = (peca[y] - 2);
-    S[x] = peca[x]; S[y] = (peca[y] + 2);
-    E[x] = (peca[x] + 2); E[y] = peca[y];
-    O[x] = (peca[x] - 2); O[y] =  peca[y];
-    NE[x] = (peca[x] + 1); NE[y] = (peca[y] - 1);
-    SE[x] = (peca[x] + 1); SE[y] = (peca[y] + 1);
-    SO[x] = (peca[x] - 1); SO[y] = (peca[y] + 1);
-    NO[x] = (peca[x] - 1); NO[y] = (peca[y] - 1);
-    *iN = 0, *iS = 0, *iE = 0, *iO = 0, *iNE = 0, *iSE = 0, *iSO = 0, *iNO = 0;
+    movimento->N[x] = peca[x]; movimento->N[y] = (peca[y] - 2);
+    movimento->S[x] = peca[x]; movimento->S[y] = (peca[y] + 2);
+    movimento->E[x] = (peca[x] + 2); movimento->E[y] = peca[y];
+    movimento->O[x] = (peca[x] - 2); movimento->O[y] =  peca[y];
+    movimento->NE[x] = (peca[x] + 1); movimento->NE[y] = (peca[y] - 1);
+    movimento->SE[x] = (peca[x] + 1); movimento->SE[y] = (peca[y] + 1);
+    movimento->SO[x] = (peca[x] - 1); movimento->SO[y] = (peca[y] + 1);
+    movimento->NO[x] = (peca[x] - 1); movimento->NO[y] = (peca[y] - 1);
+    movimento->iN = 0, movimento->iS = 0, movimento->iE = 0, movimento->iO = 0, movimento->iNE = 0, movimento->iSE = 0, movimento->iSO = 0, movimento->iNO = 0;
 
     // Posições cardeais de captura
-    cN[x] = peca[x]; cN[y] = (peca[y] - 4);
-    cS[x] = peca[x]; cS[y] = (peca[y] + 4);
-    cE[x] = (peca[x] + 4); cE[y] = peca[y];
-    cO[x] = (peca[x] - 4); cO[y] = peca[y];
-    cNE[x] = (peca[x] + 2); cNE[y] = (peca[y] - 2);
-    cSE[x] = (peca[x] + 2); cSE[y] = (peca[y] + 2);
-    cSO[x] = (peca[x] - 2); cSO[y] = (peca[y] + 2);
-    cNO[x] = (peca[x] - 2); cNO[y] = (peca[y] - 2);
-    *icN = 0, *icS = 0, *icE = 0, *icO = 0, *icNE = 0, *icSE = 0, *icSO = 0, *icNO = 0;
+    captura->N[x] = peca[x]; captura->N[y] = (peca[y] - 4);
+    captura->S[x] = peca[x]; captura->S[y] = (peca[y] + 4);
+    captura->E[x] = (peca[x] + 4); captura->E[y] = peca[y];
+    captura->O[x] = (peca[x] - 4); captura->O[y] = peca[y];
+    captura->NE[x] = (peca[x] + 2); captura->NE[y] = (peca[y] - 2);
+    captura->SE[x] = (peca[x] + 2); captura->SE[y] = (peca[y] + 2);
+    captura->SO[x] = (peca[x] - 2); captura->SO[y] = (peca[y] + 2);
+    captura->NO[x] = (peca[x] - 2); captura->NO[y] = (peca[y] - 2);
+    captura->iN = 0, captura->iS = 0, captura->iE = 0, captura->iO = 0, captura->iNE = 0, captura->iSE = 0, captura->iSO = 0, captura->iNO = 0;
 
-    // 1ª Parte: validar se as posições cardeais estão dentro do tabuleiro e se possuem um espaço
+    // 1ª Parte: validar se as posições cardeais de movimento estão dentro do tabuleiro e se possuem um espaço
     // Se o conteúdo não for um espaço, verificar se é uma inimiga. Se for, registrar -1 na posição
     // Linhas de índice par = todas as coordenadas (N, S, E, O, NE, SE, SO e NO)
     // Linhas de índice ímpar = apenas as coordenadas subcardeais (NE, SE, SO e NO)
@@ -561,412 +557,412 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
     // Jogador 2 verificar se { R, p, g }
 
     if (peca[x] % 2 == 0) {
-        if (N[y] >= LIM_SUPERIOR) {
+        if (movimento->N[y] >= LIM_SUPERIOR) {
             switch(matriz_posicao[peca[x]][peca[y]]) {
                 case 'R':
-                switch(matriz_posicao[N[x]][N[y]]) {
-                    case ' ': *iN = 1; break;
-                    case 'F': case 'f': case 'c': *iN = -1;
+                switch(matriz_posicao[movimento->N[x]][movimento->N[y]]) {
+                    case ' ': movimento->iN = 1; break;
+                    case 'F': case 'f': case 'c': movimento->iN = -1;
                 }
                 case 'p':
-                switch(matriz_posicao[N[x]][N[y]]) {
-                    case ' ': *iN = 1; break;
-                    case 'f': case 'c': *iN = -1; break;
+                switch(matriz_posicao[movimento->N[x]][movimento->N[y]]) {
+                    case ' ': movimento->iN = 1; break;
+                    case 'f': case 'c': movimento->iN = -1; break;
                 }
                 case 'g':
-                switch(matriz_posicao[N[x]][N[y]]) {
-                    case ' ': *iN = 1; break;
-                    case 'c': *iN = -1; break;
+                switch(matriz_posicao[movimento->N[x]][movimento->N[y]]) {
+                    case ' ': movimento->iN = 1; break;
+                    case 'c': movimento->iN = -1; break;
                 }
                 case 'F':
-                switch(matriz_posicao[N[x]][N[y]]) {
-                    case ' ': *iN = 1; break;
-                    case 'R': case 'p': case 'g': *iN = -1; break;
+                switch(matriz_posicao[movimento->N[x]][movimento->N[y]]) {
+                    case ' ': movimento->iN = 1; break;
+                    case 'R': case 'p': case 'g': movimento->iN = -1; break;
                 }
                 case 'f':
-                switch(matriz_posicao[N[x]][N[y]]) {
-                    case ' ': *iN = 1; break;
-                    case 'p': case 'g': *iN = -1; break;
+                switch(matriz_posicao[movimento->N[x]][movimento->N[y]]) {
+                    case ' ': movimento->iN = 1; break;
+                    case 'p': case 'g': movimento->iN = -1; break;
                 }
                 case 'c':
-                switch(matriz_posicao[N[x]][N[y]]) {
-                    case ' ': *iN = 1; break;
-                    case 'g': *iN = -1; break;
+                switch(matriz_posicao[movimento->N[x]][movimento->N[y]]) {
+                    case ' ': movimento->iN = 1; break;
+                    case 'g': movimento->iN = -1; break;
                 }
             }
         }
-        if (S[y] <= LIM_INFERIOR) {
+        if (movimento->S[y] <= LIM_INFERIOR) {
             switch(matriz_posicao[peca[x]][peca[y]]) {
                 case 'R':
-                switch(matriz_posicao[S[x]][S[y]]) {
-                    case ' ': *iS = 1; break;
-                    case 'F': case 'f': case 'c': *iS = -1; break;
+                switch(matriz_posicao[movimento->S[x]][movimento->S[y]]) {
+                    case ' ': movimento->iS = 1; break;
+                    case 'F': case 'f': case 'c': movimento->iS = -1; break;
                 }
                 case 'p':
-                switch(matriz_posicao[S[x]][S[y]]) {
-                    case ' ': *iS = 1; break;
-                    case 'f': case 'c': *iS = -1; break;
+                switch(matriz_posicao[movimento->S[x]][movimento->S[y]]) {
+                    case ' ': movimento->iS = 1; break;
+                    case 'f': case 'c': movimento->iS = -1; break;
                 }
                 case 'g':
-                switch(matriz_posicao[S[x]][S[y]]) {
-                    case ' ': *iS = 1; break;
-                    case 'c': *iS = -1; break;
+                switch(matriz_posicao[movimento->S[x]][movimento->S[y]]) {
+                    case ' ': movimento->iS = 1; break;
+                    case 'c': movimento->iS = -1; break;
                 }
                 case 'F':
-                switch(matriz_posicao[S[x]][S[y]]) {
-                    case ' ': *iS = 1; break;
-                    case 'R': case 'p': case 'g': *iS = -1; break;
+                switch(matriz_posicao[movimento->S[x]][movimento->S[y]]) {
+                    case ' ': movimento->iS = 1; break;
+                    case 'R': case 'p': case 'g': movimento->iS = -1; break;
                 }
                 case 'f':
-                switch(matriz_posicao[S[x]][S[y]]) {
-                    case ' ': *iS = 1; break;
-                    case 'p': case 'g': *iS = -1; break;
+                switch(matriz_posicao[movimento->S[x]][movimento->S[y]]) {
+                    case ' ': movimento->iS = 1; break;
+                    case 'p': case 'g': movimento->iS = -1; break;
                 }
                 case 'c':
-                switch(matriz_posicao[S[x]][S[y]]) {
-                    case ' ': *iS = 1; break;
-                    case 'g': *iS = -1; break;
+                switch(matriz_posicao[movimento->S[x]][movimento->S[y]]) {
+                    case ' ': movimento->iS = 1; break;
+                    case 'g': movimento->iS = -1; break;
                 }
             }
         }
-        if (E[x] <= LIM_DIREITO) {
+        if (movimento->E[x] <= LIM_DIREITO) {
             switch(matriz_posicao[peca[x]][peca[y]]) {
                 case 'R':
-                switch(matriz_posicao[E[x]][E[y]]) {
-                    case ' ': *iE = 1; break;
-                    case 'F': case 'f': case 'c': *iE = -1; break;
+                switch(matriz_posicao[movimento->E[x]][movimento->E[y]]) {
+                    case ' ': movimento->iE = 1; break;
+                    case 'F': case 'f': case 'c': movimento->iE = -1; break;
                 }
                 case 'p':
-                switch(matriz_posicao[E[x]][E[y]]) {
-                    case ' ': *iE = 1; break;
-                    case 'f': case 'c': *iE = -1; break;
+                switch(matriz_posicao[movimento->E[x]][movimento->E[y]]) {
+                    case ' ': movimento->iE = 1; break;
+                    case 'f': case 'c': movimento->iE = -1; break;
                 }
                 case 'g':
-                switch(matriz_posicao[E[x]][E[y]]) {
-                    case ' ': *iE = 1; break;
-                    case 'c': *iE = -1; break;
+                switch(matriz_posicao[movimento->E[x]][movimento->E[y]]) {
+                    case ' ': movimento->iE = 1; break;
+                    case 'c': movimento->iE = -1; break;
                 }
                 case 'F':
-                switch(matriz_posicao[E[x]][E[y]]) {
-                    case ' ': *iE = 1; break;
-                    case 'R': case 'p': case 'g': *iE = -1; break;
+                switch(matriz_posicao[movimento->E[x]][movimento->E[y]]) {
+                    case ' ': movimento->iE = 1; break;
+                    case 'R': case 'p': case 'g': movimento->iE = -1; break;
                 }
                 case 'f':
-                switch(matriz_posicao[E[x]][E[y]]) {
-                    case ' ': *iE = 1; break;
-                    case 'p': case 'g': *iE = -1; break;
+                switch(matriz_posicao[movimento->E[x]][movimento->E[y]]) {
+                    case ' ': movimento->iE = 1; break;
+                    case 'p': case 'g': movimento->iE = -1; break;
                 }
                 case 'c':
-                switch(matriz_posicao[E[x]][E[y]]) {
-                    case ' ': *iE = 1; break;
-                    case 'g': *iE = -1; break;
+                switch(matriz_posicao[movimento->E[x]][movimento->E[y]]) {
+                    case ' ': movimento->iE = 1; break;
+                    case 'g': movimento->iE = -1; break;
                 }
             }
         }
-        if (O[x] >= LIM_ESQUERDO) {
+        if (movimento->O[x] >= LIM_ESQUERDO) {
             switch(matriz_posicao[peca[x]][peca[y]]) {
                 case 'R':
-                switch(matriz_posicao[O[x]][O[y]]) {
-                    case ' ': *iO = 1; break;
-                    case 'F': case 'f': case 'c': *iO = -1; break;
+                switch(matriz_posicao[movimento->O[x]][movimento->O[y]]) {
+                    case ' ': movimento->iO = 1; break;
+                    case 'F': case 'f': case 'c': movimento->iO = -1; break;
                 }
                 case 'p':
-                switch(matriz_posicao[O[x]][O[y]]) {
-                    case ' ': *iO = 1; break;
-                    case 'f': case 'c': *iO = -1; break;
+                switch(matriz_posicao[movimento->O[x]][movimento->O[y]]) {
+                    case ' ': movimento->iO = 1; break;
+                    case 'f': case 'c': movimento->iO = -1; break;
                 }
                 case 'g':
-                switch(matriz_posicao[O[x]][O[y]]) {
-                    case ' ': *iO = 1; break;
-                    case 'c': *iO = -1; break;
+                switch(matriz_posicao[movimento->O[x]][movimento->O[y]]) {
+                    case ' ': movimento->iO = 1; break;
+                    case 'c': movimento->iO = -1; break;
                 }
                 case 'F':
-                switch(matriz_posicao[O[x]][O[y]]) {
-                    case ' ': *iO = 1; break;
-                    case 'R': case 'p': case 'g': *iO = -1; break;
+                switch(matriz_posicao[movimento->O[x]][movimento->O[y]]) {
+                    case ' ': movimento->iO = 1; break;
+                    case 'R': case 'p': case 'g': movimento->iO = -1; break;
                 }
                 case 'f':
-                switch(matriz_posicao[O[x]][O[y]]) {
-                    case ' ': *iO = 1; break;
-                    case 'p': case 'g': *iO = -1; break;
+                switch(matriz_posicao[movimento->O[x]][movimento->O[y]]) {
+                    case ' ': movimento->iO = 1; break;
+                    case 'p': case 'g': movimento->iO = -1; break;
                 }
                 case 'c':
-                switch(matriz_posicao[O[x]][O[y]]) {
-                    case ' ': *iO = 1; break;
-                    case 'g': *iO = -1; break;
+                switch(matriz_posicao[movimento->O[x]][movimento->O[y]]) {
+                    case ' ': movimento->iO = 1; break;
+                    case 'g': movimento->iO = -1; break;
                 }
             }
         }
-        if ((NE[x] <= LIM_DIREITO) && (NE[y] >= LIM_SUPERIOR)) {
+        if ((movimento->NE[x] <= LIM_DIREITO) && (movimento->NE[y] >= LIM_SUPERIOR)) {
             switch(matriz_posicao[peca[x]][peca[y]]) {
                 case 'R':
-                switch(matriz_posicao[NE[x]][NE[y]]) {
-                    case ' ': *iNE = 1; break;
-                    case 'F': case 'f': case 'c': *iNE = -1; break;
+                switch(matriz_posicao[movimento->NE[x]][movimento->NE[y]]) {
+                    case ' ': movimento->iNE = 1; break;
+                    case 'F': case 'f': case 'c': movimento->iNE = -1; break;
                 }
                 case 'p':
-                switch(matriz_posicao[NE[x]][NE[y]]) {
-                    case ' ': *iNE = 1; break;
-                    case 'f': case 'c': *iNE = -1; break;
+                switch(matriz_posicao[movimento->NE[x]][movimento->NE[y]]) {
+                    case ' ': movimento->iNE = 1; break;
+                    case 'f': case 'c': movimento->iNE = -1; break;
                 }
                 case 'g':
-                switch(matriz_posicao[NE[x]][NE[y]]) {
-                    case ' ': *iNE = 1; break;
-                    case 'c': *iNE = -1; break;
+                switch(matriz_posicao[movimento->NE[x]][movimento->NE[y]]) {
+                    case ' ': movimento->iNE = 1; break;
+                    case 'c': movimento->iNE = -1; break;
                 }
                 case 'F':
-                switch(matriz_posicao[NE[x]][NE[y]]) {
-                    case ' ': *iNE = 1; break;
-                    case 'R': case 'p': case 'g': *iNE = -1; break;
+                switch(matriz_posicao[movimento->NE[x]][movimento->NE[y]]) {
+                    case ' ': movimento->iNE = 1; break;
+                    case 'R': case 'p': case 'g': movimento->iNE = -1; break;
                 }
                 case 'f':
-                switch(matriz_posicao[NE[x]][NE[y]]) {
-                    case ' ': *iNE = 1; break;
-                    case 'p': case 'g': *iNE = -1; break;
+                switch(matriz_posicao[movimento->NE[x]][movimento->NE[y]]) {
+                    case ' ': movimento->iNE = 1; break;
+                    case 'p': case 'g': movimento->iNE = -1; break;
                 }
                 case 'c':
-                switch(matriz_posicao[NE[x]][NE[y]]) {
-                    case ' ': *iNE = 1; break;
-                    case 'g': *iNE = -1; break;
+                switch(matriz_posicao[movimento->NE[x]][movimento->NE[y]]) {
+                    case ' ': movimento->iNE = 1; break;
+                    case 'g': movimento->iNE = -1; break;
                 }
             }
         }
-        if ((SE[x] <= LIM_DIREITO) && (SE[y] <= LIM_INFERIOR)) {
+        if ((movimento->SE[x] <= LIM_DIREITO) && (movimento->SE[y] <= LIM_INFERIOR)) {
             switch(matriz_posicao[peca[x]][peca[y]]) {
                 case 'R':
-                switch(matriz_posicao[SE[x]][SE[y]]) {
-                    case ' ': *iSE = 1; break;
-                    case 'F': case 'f': case 'c': *iSE = -1; break;
+                switch(matriz_posicao[movimento->SE[x]][movimento->SE[y]]) {
+                    case ' ': movimento->iSE = 1; break;
+                    case 'F': case 'f': case 'c': movimento->iSE = -1; break;
                 }
                 case 'p':
-                switch(matriz_posicao[SE[x]][SE[y]]) {
-                    case ' ': *iSE = 1; break;
-                    case 'f': case 'c': *iSE = -1; break;
+                switch(matriz_posicao[movimento->SE[x]][movimento->SE[y]]) {
+                    case ' ': movimento->iSE = 1; break;
+                    case 'f': case 'c': movimento->iSE = -1; break;
                 }
                 case 'g':
-                switch(matriz_posicao[SE[x]][SE[y]]) {
-                    case ' ': *iSE = 1; break;
-                    case 'c': *iSE = -1; break;
+                switch(matriz_posicao[movimento->SE[x]][movimento->SE[y]]) {
+                    case ' ': movimento->iSE = 1; break;
+                    case 'c': movimento->iSE = -1; break;
                 }
                 case 'F':
-                switch(matriz_posicao[SE[x]][SE[y]]) {
-                    case ' ': *iSE = 1; break;
-                    case 'R': case 'p': case 'g': *iSE = -1; break;
+                switch(matriz_posicao[movimento->SE[x]][movimento->SE[y]]) {
+                    case ' ': movimento->iSE = 1; break;
+                    case 'R': case 'p': case 'g': movimento->iSE = -1; break;
                 }
                 case 'f':
-                switch(matriz_posicao[SE[x]][SE[y]]) {
-                    case ' ': *iSE = 1; break;
-                    case 'p': case 'g': *iSE = -1; break;
+                switch(matriz_posicao[movimento->SE[x]][movimento->SE[y]]) {
+                    case ' ': movimento->iSE = 1; break;
+                    case 'p': case 'g': movimento->iSE = -1; break;
                 }
                 case 'c':
-                switch(matriz_posicao[SE[x]][SE[y]]) {
-                    case ' ': *iSE = 1; break;
-                    case 'g': *iSE = -1; break;
+                switch(matriz_posicao[movimento->SE[x]][movimento->SE[y]]) {
+                    case ' ': movimento->iSE = 1; break;
+                    case 'g': movimento->iSE = -1; break;
                 }
             }
         }
-        if ((SO[x] >= LIM_ESQUERDO) && (SO[y] <= LIM_INFERIOR)) {
+        if ((movimento->SO[x] >= LIM_ESQUERDO) && (movimento->SO[y] <= LIM_INFERIOR)) {
             switch(matriz_posicao[peca[x]][peca[y]]) {
                 case 'R':
-                switch(matriz_posicao[SO[x]][SO[y]]) {
-                    case ' ': *iSO = 1; break;
-                    case 'F': case 'f': case 'c': *iSO = -1; break;
+                switch(matriz_posicao[movimento->SO[x]][movimento->SO[y]]) {
+                    case ' ': movimento->iSO = 1; break;
+                    case 'F': case 'f': case 'c': movimento->iSO = -1; break;
                 }
                 case 'p':
-                switch(matriz_posicao[SO[x]][SO[y]]) {
-                    case ' ': *iSO = 1; break;
-                    case 'f': case 'c': *iSO = -1; break;
+                switch(matriz_posicao[movimento->SO[x]][movimento->SO[y]]) {
+                    case ' ': movimento->iSO = 1; break;
+                    case 'f': case 'c': movimento->iSO = -1; break;
                 }
                 case 'g':
-                switch(matriz_posicao[SO[x]][SO[y]]) {
-                    case ' ': *iSO = 1; break;
-                    case 'c': *iSO = -1; break;
+                switch(matriz_posicao[movimento->SO[x]][movimento->SO[y]]) {
+                    case ' ': movimento->iSO = 1; break;
+                    case 'c': movimento->iSO = -1; break;
                 }
                 case 'F':
-                switch(matriz_posicao[SO[x]][SO[y]]) {
-                    case ' ': *iSO = 1; break;
-                    case 'R': case 'p': case 'g': *iSO = -1; break;
+                switch(matriz_posicao[movimento->SO[x]][movimento->SO[y]]) {
+                    case ' ': movimento->iSO = 1; break;
+                    case 'R': case 'p': case 'g': movimento->iSO = -1; break;
                 }
                 case 'f':
-                switch(matriz_posicao[SO[x]][SO[y]]) {
-                    case ' ': *iSO = 1; break;
-                    case 'p': case 'g': *iSO = -1; break;
+                switch(matriz_posicao[movimento->SO[x]][movimento->SO[y]]) {
+                    case ' ': movimento->iSO = 1; break;
+                    case 'p': case 'g': movimento->iSO = -1; break;
                 }
                 case 'c':
-                switch(matriz_posicao[SO[x]][SO[y]]) {
-                    case ' ': *iSO = 1; break;
-                    case 'g': *iSO = -1; break;
+                switch(matriz_posicao[movimento->SO[x]][movimento->SO[y]]) {
+                    case ' ': movimento->iSO = 1; break;
+                    case 'g': movimento->iSO = -1; break;
                 }
             }
         }
-        if ((NO[x] >= LIM_ESQUERDO) && (NO[y] >= LIM_SUPERIOR)) {
+        if ((movimento->NO[x] >= LIM_ESQUERDO) && (movimento->NO[y] >= LIM_SUPERIOR)) {
             switch(matriz_posicao[peca[x]][peca[y]]) {
                 case 'R':
-                switch(matriz_posicao[NO[x]][NO[y]]) {
-                    case ' ': *iNO = 1; break;
-                    case 'F': case 'f': case 'c': *iNO = -1; break;
+                switch(matriz_posicao[movimento->NO[x]][movimento->NO[y]]) {
+                    case ' ': movimento->iNO = 1; break;
+                    case 'F': case 'f': case 'c': movimento->iNO = -1; break;
                 }
                 case 'p':
-                switch(matriz_posicao[NO[x]][NO[y]]) {
-                    case ' ': *iNO = 1; break;
-                    case 'f': case 'c': *iNO = -1; break;
+                switch(matriz_posicao[movimento->NO[x]][movimento->NO[y]]) {
+                    case ' ': movimento->iNO = 1; break;
+                    case 'f': case 'c': movimento->iNO = -1; break;
                 }
                 case 'g':
-                switch(matriz_posicao[NO[x]][NO[y]]) {
-                    case ' ': *iNO = 1; break;
-                    case 'c': *iNO = -1; break;
+                switch(matriz_posicao[movimento->NO[x]][movimento->NO[y]]) {
+                    case ' ': movimento->iNO = 1; break;
+                    case 'c': movimento->iNO = -1; break;
                 }
                 case 'F':
-                switch(matriz_posicao[NO[x]][NO[y]]) {
-                    case ' ': *iNO = 1; break;
-                    case 'R': case 'p': case 'g': *iNO = -1; break;
+                switch(matriz_posicao[movimento->NO[x]][movimento->NO[y]]) {
+                    case ' ': movimento->iNO = 1; break;
+                    case 'R': case 'p': case 'g': movimento->iNO = -1; break;
                 }
                 case 'f':
-                switch(matriz_posicao[NO[x]][NO[y]]) {
-                    case ' ': *iNO = 1; break;
-                    case 'p': case 'g': *iNO = -1; break;
+                switch(matriz_posicao[movimento->NO[x]][movimento->NO[y]]) {
+                    case ' ': movimento->iNO = 1; break;
+                    case 'p': case 'g': movimento->iNO = -1; break;
                 }
                 case 'c':
-                switch(matriz_posicao[NO[x]][NO[y]]) {
-                    case ' ': *iNO = 1; break;
-                    case 'g': *iNO = -1; break;
+                switch(matriz_posicao[movimento->NO[x]][movimento->NO[y]]) {
+                    case ' ': movimento->iNO = 1; break;
+                    case 'g': movimento->iNO = -1; break;
                 }
             }
         }
     } else { // Linha ímpar
-        if ((NE[x] <= LIM_DIREITO) && (NE[y] >= LIM_SUPERIOR)) {
+        if ((movimento->NE[x] <= LIM_DIREITO) && (movimento->NE[y] >= LIM_SUPERIOR)) {
             switch(matriz_posicao[peca[x]][peca[y]]) {
                 case 'R':
-                switch(matriz_posicao[NE[x]][NE[y]]) {
-                    case ' ': *iNE = 1; break;
-                    case 'F': case 'f': case 'c': *iNE = -1; break;
+                switch(matriz_posicao[movimento->NE[x]][movimento->NE[y]]) {
+                    case ' ': movimento->iNE = 1; break;
+                    case 'F': case 'f': case 'c': movimento->iNE = -1; break;
                 }
                 case 'p':
-                switch(matriz_posicao[NE[x]][NE[y]]) {
-                    case ' ': *iNE = 1; break;
-                    case 'f': case 'c': *iNE = -1; break;
+                switch(matriz_posicao[movimento->NE[x]][movimento->NE[y]]) {
+                    case ' ': movimento->iNE = 1; break;
+                    case 'f': case 'c': movimento->iNE = -1; break;
                 }
                 case 'g':
-                switch(matriz_posicao[NE[x]][NE[y]]) {
-                    case ' ': *iNE = 1; break;
-                    case 'c': *iNE = -1; break;
+                switch(matriz_posicao[movimento->NE[x]][movimento->NE[y]]) {
+                    case ' ': movimento->iNE = 1; break;
+                    case 'c': movimento->iNE = -1; break;
                 }
                 case 'F':
-                switch(matriz_posicao[NE[x]][NE[y]]) {
-                    case ' ': *iNE = 1; break;
-                    case 'R': case 'p': case 'g': *iNE = -1; break;
+                switch(matriz_posicao[movimento->NE[x]][movimento->NE[y]]) {
+                    case ' ': movimento->iNE = 1; break;
+                    case 'R': case 'p': case 'g': movimento->iNE = -1; break;
                 }
                 case 'f':
-                switch(matriz_posicao[NE[x]][NE[y]]) {
-                    case ' ': *iNE = 1; break;
-                    case 'p': case 'g': *iNE = -1; break;
+                switch(matriz_posicao[movimento->NE[x]][movimento->NE[y]]) {
+                    case ' ': movimento->iNE = 1; break;
+                    case 'p': case 'g': movimento->iNE = -1; break;
                 }
                 case 'c':
-                switch(matriz_posicao[NE[x]][NE[y]]) {
-                    case ' ': *iNE = 1; break;
-                    case 'g': *iNE = -1; break;
+                switch(matriz_posicao[movimento->NE[x]][movimento->NE[y]]) {
+                    case ' ': movimento->iNE = 1; break;
+                    case 'g': movimento->iNE = -1; break;
                 }
             }
         }
-        if ((SE[x] <= LIM_DIREITO) && (SE[y] <= LIM_INFERIOR)) {
+        if ((movimento->SE[x] <= LIM_DIREITO) && (movimento->SE[y] <= LIM_INFERIOR)) {
             switch(matriz_posicao[peca[x]][peca[y]]) {
                 case 'R':
-                switch(matriz_posicao[SE[x]][SE[y]]) {
-                    case ' ': *iSE = 1; break;
-                    case 'F': case 'f': case 'c': *iSE = -1; break;
+                switch(matriz_posicao[movimento->SE[x]][movimento->SE[y]]) {
+                    case ' ': movimento->iSE = 1; break;
+                    case 'F': case 'f': case 'c': movimento->iSE = -1; break;
                 }
                 case 'p':
-                switch(matriz_posicao[SE[x]][SE[y]]) {
-                    case ' ': *iSE = 1; break;
-                    case 'f': case 'c': *iSE = -1; break;
+                switch(matriz_posicao[movimento->SE[x]][movimento->SE[y]]) {
+                    case ' ': movimento->iSE = 1; break;
+                    case 'f': case 'c': movimento->iSE = -1; break;
                 }
                 case 'g':
-                switch(matriz_posicao[SE[x]][SE[y]]) {
-                    case ' ': *iSE = 1; break;
-                    case 'c': *iSE = -1; break;
+                switch(matriz_posicao[movimento->SE[x]][movimento->SE[y]]) {
+                    case ' ': movimento->iSE = 1; break;
+                    case 'c': movimento->iSE = -1; break;
                 }
                 case 'F':
-                switch(matriz_posicao[SE[x]][SE[y]]) {
-                    case ' ': *iSE = 1; break;
-                    case 'R': case 'p': case 'g': *iSE = -1; break;
+                switch(matriz_posicao[movimento->SE[x]][movimento->SE[y]]) {
+                    case ' ': movimento->iSE = 1; break;
+                    case 'R': case 'p': case 'g': movimento->iSE = -1; break;
                 }
                 case 'f':
-                switch(matriz_posicao[SE[x]][SE[y]]) {
-                    case ' ': *iSE = 1; break;
-                    case 'p': case 'g': *iSE = -1; break;
+                switch(matriz_posicao[movimento->SE[x]][movimento->SE[y]]) {
+                    case ' ': movimento->iSE = 1; break;
+                    case 'p': case 'g': movimento->iSE = -1; break;
                 }
                 case 'c':
-                switch(matriz_posicao[SE[x]][SE[y]]) {
-                    case ' ': *iSE = 1; break;
-                    case 'g': *iSE = -1; break;
+                switch(matriz_posicao[movimento->SE[x]][movimento->SE[y]]) {
+                    case ' ': movimento->iSE = 1; break;
+                    case 'g': movimento->iSE = -1; break;
                 }
             }
         }
-        if ((SO[x] >= LIM_ESQUERDO) && (SO[y] <= LIM_INFERIOR)) {
+        if ((movimento->SO[x] >= LIM_ESQUERDO) && (movimento->SO[y] <= LIM_INFERIOR)) {
             switch(matriz_posicao[peca[x]][peca[y]]) {
                 case 'R':
-                switch(matriz_posicao[SO[x]][SO[y]]) {
-                    case ' ': *iSO = 1; break;
-                    case 'F': case 'f': case 'c': *iSO = -1; break;
+                switch(matriz_posicao[movimento->SO[x]][movimento->SO[y]]) {
+                    case ' ': movimento->iSO = 1; break;
+                    case 'F': case 'f': case 'c': movimento->iSO = -1; break;
                 }
                 case 'p':
-                switch(matriz_posicao[SO[x]][SO[y]]) {
-                    case ' ': *iSO = 1; break;
-                    case 'f': case 'c': *iSO = -1; break;
+                switch(matriz_posicao[movimento->SO[x]][movimento->SO[y]]) {
+                    case ' ': movimento->iSO = 1; break;
+                    case 'f': case 'c': movimento->iSO = -1; break;
                 }
                 case 'g':
-                switch(matriz_posicao[SO[x]][SO[y]]) {
-                    case ' ': *iSO = 1; break;
-                    case 'c': *iSO = -1; break;
+                switch(matriz_posicao[movimento->SO[x]][movimento->SO[y]]) {
+                    case ' ': movimento->iSO = 1; break;
+                    case 'c': movimento->iSO = -1; break;
                 }
                 case 'F':
-                switch(matriz_posicao[SO[x]][SO[y]]) {
-                    case ' ': *iSO = 1; break;
-                    case 'R': case 'p': case 'g': *iSO = -1; break;
+                switch(matriz_posicao[movimento->SO[x]][movimento->SO[y]]) {
+                    case ' ': movimento->iSO = 1; break;
+                    case 'R': case 'p': case 'g': movimento->iSO = -1; break;
                 }
                 case 'f':
-                switch(matriz_posicao[SO[x]][SO[y]]) {
-                    case ' ': *iSO = 1; break;
-                    case 'p': case 'g': *iSO = -1; break;
+                switch(matriz_posicao[movimento->SO[x]][movimento->SO[y]]) {
+                    case ' ': movimento->iSO = 1; break;
+                    case 'p': case 'g': movimento->iSO = -1; break;
                 }
                 case 'c':
-                switch(matriz_posicao[SO[x]][SO[y]]) {
-                    case ' ': *iSO = 1; break;
-                    case 'g': *iSO = -1; break;
+                switch(matriz_posicao[movimento->SO[x]][movimento->SO[y]]) {
+                    case ' ': movimento->iSO = 1; break;
+                    case 'g': movimento->iSO = -1; break;
                 }
             }
         }
-        if ((NO[x] >= LIM_ESQUERDO) && (NO[y] >= LIM_SUPERIOR)) {
+        if ((movimento->NO[x] >= LIM_ESQUERDO) && (movimento->NO[y] >= LIM_SUPERIOR)) {
             switch(matriz_posicao[peca[x]][peca[y]]) {
                 case 'R':
-                switch(matriz_posicao[NO[x]][NO[y]]) {
-                    case ' ': *iNO = 1; break;
-                    case 'F': case 'f': case 'c': *iNO = -1; break;
+                switch(matriz_posicao[movimento->NO[x]][movimento->NO[y]]) {
+                    case ' ': movimento->iNO = 1; break;
+                    case 'F': case 'f': case 'c': movimento->iNO = -1; break;
                 }
                 case 'p':
-                switch(matriz_posicao[NO[x]][NO[y]]) {
-                    case ' ': *iNO = 1; break;
-                    case 'f': case 'c': *iNO = -1; break;
+                switch(matriz_posicao[movimento->NO[x]][movimento->NO[y]]) {
+                    case ' ': movimento->iNO = 1; break;
+                    case 'f': case 'c': movimento->iNO = -1; break;
                 }
                 case 'g':
-                switch(matriz_posicao[NO[x]][NO[y]]) {
-                    case ' ': *iNO = 1; break;
-                    case 'c': *iNO = -1; break;
+                switch(matriz_posicao[movimento->NO[x]][movimento->NO[y]]) {
+                    case ' ': movimento->iNO = 1; break;
+                    case 'c': movimento->iNO = -1; break;
                 }
                 case 'F':
-                switch(matriz_posicao[NO[x]][NO[y]]) {
-                    case ' ': *iNO = 1; break;
-                    case 'R': case 'p': case 'g': *iNO = -1; break;
+                switch(matriz_posicao[movimento->NO[x]][movimento->NO[y]]) {
+                    case ' ': movimento->iNO = 1; break;
+                    case 'R': case 'p': case 'g': movimento->iNO = -1; break;
                 }
                 case 'f':
-                switch(matriz_posicao[NO[x]][NO[y]]) {
-                    case ' ': *iNO = 1; break;
-                    case 'p': case 'g': *iNO = -1; break;
+                switch(matriz_posicao[movimento->NO[x]][movimento->NO[y]]) {
+                    case ' ': movimento->iNO = 1; break;
+                    case 'p': case 'g': movimento->iNO = -1; break;
                 }
                 case 'c':
-                switch(matriz_posicao[NO[x]][NO[y]]) {
-                    case ' ': *iNO = 1; break;
-                    case 'g': *iNO = -1; break;
+                switch(matriz_posicao[movimento->NO[x]][movimento->NO[y]]) {
+                    case ' ': movimento->iNO = 1; break;
+                    case 'g': movimento->iNO = -1; break;
                 }
             }
         }
@@ -978,24 +974,28 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
         // Se não tiver espaço, desabilitar (false)
 
     if (peca[x] % 2 == 0) {
-        if ((*iN == -1) && (cN[y] >= LIM_SUPERIOR) && (matriz_posicao[cN[x]][cN[y]] == ' ')) *icN = 1;
-        if ((*iS == -1) && (cS[y] <= LIM_INFERIOR) && (matriz_posicao[cS[x]][cS[y]] == ' ')) *icS = 1;
-        if ((*iE == -1) && (cE[x] <= LIM_DIREITO) && (matriz_posicao[cE[x]][cE[y]] == ' ')) *icE = 1;
-        if ((*iO == -1) && (cO[x] >= LIM_ESQUERDO) && (matriz_posicao[cO[x]][cO[y]] == ' ')) *icO = 1;
-        if ((*iNE == -1) && (cNE[x] <= LIM_DIREITO) && (cNE[y] >= LIM_SUPERIOR) && (matriz_posicao[cNE[x]][cNE[y]] == ' ')) *icNE = 1;
-        if ((*iSE == -1) && (cSE[x] <= LIM_DIREITO) && (cSE[y] <= LIM_INFERIOR) && (matriz_posicao[cSE[x]][cSE[y]] == ' ')) *icSE = 1;
-        if ((*iSO == -1) && (cSO[x] >= LIM_ESQUERDO) && (cSO[y] <= LIM_INFERIOR) && (matriz_posicao[cSO[x]][cSO[y]] == ' ')) *icSO = 1;
-        if ((*iNO == -1) && (cNO[x] >= LIM_ESQUERDO) && (cNO[y] >= LIM_SUPERIOR) && (matriz_posicao[cNO[x]][cNO[y]] == ' ')) *icNO = 1;
+        if ((movimento->iN == -1) && (captura->N[y] >= LIM_SUPERIOR) && (matriz_posicao[captura->N[x]][captura->N[y]] == ' ')) captura->iN = 1;
+        if ((movimento->iS == -1) && (captura->S[y] <= LIM_INFERIOR) && (matriz_posicao[captura->S[x]][captura->S[y]] == ' ')) captura->iS = 1;
+        if ((movimento->iE == -1) && (captura->E[x] <= LIM_DIREITO) && (matriz_posicao[captura->E[x]][captura->E[y]] == ' ')) captura->iE = 1;
+        if ((movimento->iO == -1) && (captura->O[x] >= LIM_ESQUERDO) && (matriz_posicao[captura->O[x]][captura->O[y]] == ' ')) captura->iO = 1;
+        if ((movimento->iNE == -1) && (captura->NE[x] <= LIM_DIREITO) && (captura->NE[y] >= LIM_SUPERIOR)
+            && (matriz_posicao[captura->NE[x]][captura->NE[y]] == ' ')) captura->iNE = 1;
+        if ((movimento->iSE == -1) && (captura->SE[x] <= LIM_DIREITO) && (captura->SE[y] <= LIM_INFERIOR)
+            && (matriz_posicao[captura->SE[x]][captura->SE[y]] == ' ')) captura->iSE = 1;
+        if ((movimento->iSO == -1) && (captura->SO[x] >= LIM_ESQUERDO) && (captura->SO[y] <= LIM_INFERIOR)
+            && (matriz_posicao[captura->SO[x]][captura->SO[y]] == ' ')) captura->iSO = 1;
+        if ((movimento->iNO == -1) && (captura->NO[x] >= LIM_ESQUERDO) && (captura->NO[y] >= LIM_SUPERIOR)
+            && (matriz_posicao[captura->NO[x]][captura->NO[y]] == ' ')) captura->iNO = 1;
     } else { // Linha ímpar
-        if ((*iNE == -1) && (cNE[x] <= LIM_DIREITO) && (cNE[y] >= LIM_SUPERIOR) && (matriz_posicao[cNE[x]][cNE[y]] == ' ')) *icNE = 1;
-        if ((*iSE == -1) && (cSE[x] <= LIM_DIREITO) && (cSE[y] <= LIM_INFERIOR) && (matriz_posicao[cSE[x]][cSE[y]] == ' ')) *icSE = 1;
-        if ((*iSO == -1) && (cSO[x] >= LIM_ESQUERDO) && (cSO[y] <= LIM_INFERIOR) && (matriz_posicao[cSO[x]][cSO[y]] == ' ')) *icSO = 1;
-        if ((*iNO == -1) && (cNO[x] >= LIM_ESQUERDO) && (cNO[y] >= LIM_SUPERIOR) && (matriz_posicao[cNO[x]][cNO[y]] == ' ')) *icNO = 1;
+        if ((captura->iNE == -1) && (captura->NE[x] <= LIM_DIREITO) && (captura->NE[y] >= LIM_SUPERIOR) && (matriz_posicao[captura->NE[x]][captura->NE[y]] == ' ')) captura->iNE = 1;
+        if ((captura->iSE == -1) && (captura->SE[x] <= LIM_DIREITO) && (captura->SE[y] <= LIM_INFERIOR) && (matriz_posicao[captura->SE[x]][captura->SE[y]] == ' ')) captura->iSE = 1;
+        if ((captura->iSO == -1) && (captura->SO[x] >= LIM_ESQUERDO) && (captura->SO[y] <= LIM_INFERIOR) && (matriz_posicao[captura->SO[x]][captura->SO[y]] == ' ')) captura->iSO = 1;
+        if ((captura->iNO == -1) && (captura->NO[x] >= LIM_ESQUERDO) && (captura->NO[y] >= LIM_SUPERIOR) && (matriz_posicao[captura->NO[x]][captura->NO[y]] == ' ')) captura->iNO = 1;
     }
 
     // Se todas as posições cardeais de movimento e captura forem 0 ou -1, o movimento da peça é impossível
-    if (((*iN < 1) && (*iS < 1) && (*iE < 1) && (*iO < 1) && (*iNE < 1) && (*iSE < 1) && (*iSO < 1) && (*iNO < 1))
-        && ((*icN < 1) && (*icS < 1) && (*icE < 1) && (*icO < 1) && (*icNE < 1) && (*icSE < 1) && (*icSO < 1) && (*icNO < 1))) {
+    if (((movimento->iN < 1) && (movimento->iS < 1) && (movimento->iE < 1) && (movimento->iO < 1) && (movimento->iNE < 1) && (movimento->iSE < 1) && (movimento->iSO < 1) && (movimento->iNO < 1))
+        && ((captura->iN < 1) && (captura->iS < 1) && (captura->iE < 1) && (captura->iO < 1) && (captura->iNE < 1) && (captura->iSE < 1) && (captura->iSO < 1) && (captura->iNO < 1))) {
         puts("Essa peca nao pode se mover, tente outra...");
         sleep(2);
         return false;
@@ -1035,10 +1035,7 @@ void pedir_destino(int dest[]) {
     dest[y] = coord_y_dest;
 }
 
-bool validar_destino(const int peca[], const int dest[], char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], int N[], int S[], int E[], int O[],
-    int NE[], int SE[], int SO[], int NO[], int *iN, int *iS, int *iE, int *iO, int *iNE, int *iSE, int *iSO, int *iNO,
-    int cN[], int cS[], int cE[], int cO[], int cNE[], int cSE[], int cSO[], int cNO[], int *icN, int *icS, int *icE, int *icO,
-    int *icNE, int *icSE, int *icSO, int *icNO, char pecas_jog1[], char pecas_jog2[]) {
+bool validar_destino(const int peca[], const int dest[], char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], pontoCardeal movimento, pontoCardeal captura, char pecas_jog1[], char pecas_jog2[]) {
     const int x = 0, y = 1;
     // Retornar 0 para destino inválido, 1 para movimento normal, 2 para movimento de captura
     // 1ª parte: validar se o destino está dentro do tabuleiro. Se não estiver, retornar false
@@ -1066,46 +1063,46 @@ bool validar_destino(const int peca[], const int dest[], char matriz_posicao[TAM
     // Para ser uma captura válida, a cardeal de movimento == -1 e a cardeal de captura == 1
     // Se for captura válida, chamar a função capturar_peca(<posição movimento cardeal equivalente>)
     if (peca[x] % 2 == 0) {
-        if ((((dest[x] == N[x]) && (dest[y] == N[y]) && (*iN == 1)))
-        || (((dest[x] == S[x]) && (dest[y] == S[y]) && (*iS == 1)))
-        || (((dest[x] == E[x]) && (dest[y] == E[y]) && (*iE == 1)))
-        || (((dest[x] == O[x]) && (dest[y] == O[y]) && (*iO == 1)))
-        || (((dest[x] == NE[x]) && (dest[y] == NE[y]) && (*iNE == 1)))
-        || (((dest[x] == SE[x]) && (dest[y] == SE[y]) && (*iSE == 1)))
-        || (((dest[x] == SO[x]) && (dest[y] == SO[y]) && (*iSO == 1)))
-        || (((dest[x] == NO[x]) && (dest[y] == NO[y]) && (*iNO == 1)))) {
+        if ((((dest[x] == movimento.N[x]) && (dest[y] == movimento.N[y]) && (movimento.iN == 1)))
+        || (((dest[x] == movimento.S[x]) && (dest[y] == movimento.S[y]) && (movimento.iS == 1)))
+        || (((dest[x] == movimento.E[x]) && (dest[y] == movimento.E[y]) && (movimento.iE == 1)))
+        || (((dest[x] == movimento.O[x]) && (dest[y] == movimento.O[y]) && (movimento.iO == 1)))
+        || (((dest[x] == movimento.NE[x]) && (dest[y] == movimento.NE[y]) && (movimento.iNE == 1)))
+        || (((dest[x] == movimento.SE[x]) && (dest[y] == movimento.SE[y]) && (movimento.iSE == 1)))
+        || (((dest[x] == movimento.SO[x]) && (dest[y] == movimento.SO[y]) && (movimento.iSO == 1)))
+        || (((dest[x] == movimento.NO[x]) && (dest[y] == movimento.NO[y]) && (movimento.iNO == 1)))) {
             return true;            
         } else {
-            if ((dest[x] == cN[x]) && (dest[y] == cN[y]) && (*iN == -1) && (*icN == 1)) {
-                capturar_peca(N, matriz_posicao, pecas_jog1, pecas_jog2);
+            if ((dest[x] == captura.N[x]) && (dest[y] == captura.N[y]) && (movimento.iN == -1) && (captura.iN == 1)) {
+                capturar_peca(movimento.N, matriz_posicao, pecas_jog1, pecas_jog2);
                 return true;
             }
-            if ((dest[x] == cS[x]) && (dest[y] == cS[y]) && (*iS == -1) && (*icS == 1)) {
-                capturar_peca(S, matriz_posicao, pecas_jog1, pecas_jog2);
+            if ((dest[x] == captura.S[x]) && (dest[y] == captura.S[y]) && (movimento.iS == -1) && (captura.iS == 1)) {
+                capturar_peca(movimento.S, matriz_posicao, pecas_jog1, pecas_jog2);
                 return true;
             }
-            if ((dest[x] == cE[x]) && (dest[y] == cE[y]) && (*iE == -1) && (*icE == 1)) {
-                capturar_peca(E, matriz_posicao, pecas_jog1, pecas_jog2);
+            if ((dest[x] == captura.E[x]) && (dest[y] == captura.E[y]) && (movimento.iE == -1) && (captura.iE == 1)) {
+                capturar_peca(movimento.E, matriz_posicao, pecas_jog1, pecas_jog2);
                 return true;
             }
-            if ((dest[x] == cO[x]) && (dest[y] == cO[y]) && (*iO == -1) && (*icO == 1)) {
-                capturar_peca(O, matriz_posicao, pecas_jog1, pecas_jog2);
+            if ((dest[x] == captura.O[x]) && (dest[y] == captura.O[y]) && (movimento.iO == -1) && (captura.iO == 1)) {
+                capturar_peca(movimento.O, matriz_posicao, pecas_jog1, pecas_jog2);
                 return true;
             }
-            if ((dest[x] == cNE[x]) && (dest[y] == cNE[y]) && (*iNE == -1) && (*icNE == 1)) {
-                capturar_peca(NE, matriz_posicao, pecas_jog1, pecas_jog2);
+            if ((dest[x] == captura.NE[x]) && (dest[y] == captura.NE[y]) && (movimento.iNE == -1) && (captura.iNE == 1)) {
+                capturar_peca(movimento.NE, matriz_posicao, pecas_jog1, pecas_jog2);
                 return true;
             }
-            if ((dest[x] == cSE[x]) && (dest[y] == cSE[y]) && (*iSE == -1) && (*icSE == 1)) {
-                capturar_peca(SE, matriz_posicao, pecas_jog1, pecas_jog2);
+            if ((dest[x] == captura.SE[x]) && (dest[y] == captura.SE[y]) && (movimento.iSE == -1) && (captura.iSE == 1)) {
+                capturar_peca(movimento.SE, matriz_posicao, pecas_jog1, pecas_jog2);
                 return true;
             }
-            if ((dest[x] == cSO[x]) && (dest[y] == cSO[y]) && (*iSO == -1) && (*icSO == 1)) {
-                capturar_peca(SO, matriz_posicao, pecas_jog1, pecas_jog2);
+            if ((dest[x] == captura.SO[x]) && (dest[y] == captura.SO[y]) && (movimento.iSO == -1) && (captura.iSO == 1)) {
+                capturar_peca(movimento.SO, matriz_posicao, pecas_jog1, pecas_jog2);
                 return true;
             }
-            if ((dest[x] == cNO[x]) && (dest[y] == cNO[y]) && (*iNO == -1) && (*icNO == 1)) {
-                capturar_peca(NO, matriz_posicao, pecas_jog1, pecas_jog2);
+            if ((dest[x] == captura.NO[x]) && (dest[y] == captura.NO[y]) && (movimento.iNO == -1) && (captura.iNO == 1)) {
+                capturar_peca(movimento.NO, matriz_posicao, pecas_jog1, pecas_jog2);
                 return true;
             }
             puts("Destino invalido...");
@@ -1113,26 +1110,26 @@ bool validar_destino(const int peca[], const int dest[], char matriz_posicao[TAM
             return false;
         }
     } else { // linha ímpar
-        if ((((dest[x] == NE[x]) && (dest[y] == NE[y]) && (*iNE == 1)))
-        || (((dest[x] == SE[x]) && (dest[y] == SE[y]) && (*iSE == 1)))
-        || (((dest[x] == SO[x]) && (dest[y] == SO[y]) && (*iSO == 1)))
-        || (((dest[x] == NO[x]) && (dest[y] == NO[y]) && (*iNO == 1)))) {
+        if ((((dest[x] == movimento.NE[x]) && (dest[y] == movimento.NE[y]) && (movimento.iNE == 1)))
+        || (((dest[x] == movimento.SE[x]) && (dest[y] == movimento.SE[y]) && (movimento.iSE == 1)))
+        || (((dest[x] == movimento.SO[x]) && (dest[y] == movimento.SO[y]) && (movimento.iSO == 1)))
+        || (((dest[x] == movimento.NO[x]) && (dest[y] == movimento.NO[y]) && (movimento.iNO == 1)))) {
             return true;            
         } else {
-            if ((dest[x] == cNE[x]) && (dest[y] == cNE[y]) && (*iNE == -1) && (*icNE == 1)) {
-                capturar_peca(NE, matriz_posicao, pecas_jog1, pecas_jog2);
+            if ((dest[x] == captura.NE[x]) && (dest[y] == captura.NE[y]) && (movimento.iNE == -1) && (captura.iNE == 1)) {
+                capturar_peca(movimento.NE, matriz_posicao, pecas_jog1, pecas_jog2);
                 return true;
             }
-            if ((dest[x] == cSE[x]) && (dest[y] == cSE[y]) && (*iSE == -1) && (*icSE == 1)) {
-                capturar_peca(SE, matriz_posicao, pecas_jog1, pecas_jog2);
+            if ((dest[x] == captura.SE[x]) && (dest[y] == captura.SE[y]) && (movimento.iSE == -1) && (captura.iSE == 1)) {
+                capturar_peca(movimento.SE, matriz_posicao, pecas_jog1, pecas_jog2);
                 return true;
             }
-            if ((dest[x] == cSO[x]) && (dest[y] == cSO[y]) && (*iSO == -1) && (*icSO == 1)) {
-                capturar_peca(SO, matriz_posicao, pecas_jog1, pecas_jog2);
+            if ((dest[x] == captura.SO[x]) && (dest[y] == captura.SO[y]) && (movimento.iSO == -1) && (captura.iSO == 1)) {
+                capturar_peca(movimento.SO, matriz_posicao, pecas_jog1, pecas_jog2);
                 return true;
             }
-            if ((dest[x] == cNO[x]) && (dest[y] == cNO[y]) && (*iNO == -1) && (*icNO == 1)) {
-                capturar_peca(NO, matriz_posicao, pecas_jog1, pecas_jog2);
+            if ((dest[x] == captura.NO[x]) && (dest[y] == captura.NO[y]) && (movimento.iNO == -1) && (captura.iNO == 1)) {
+                capturar_peca(movimento.NO, matriz_posicao, pecas_jog1, pecas_jog2);
                 return true;
             }
             puts("Destino invalido...");
