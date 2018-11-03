@@ -86,7 +86,14 @@ int main(void) {
                 imprimir_tabuleiro(matriz_posicao);
 
                 if (!verificar_vetor_pecas(pecas_jog1, pecas_jog2, TAM_VETOR, &jog_atual)) {
-                    puts("Voce ficou sem movimentos possiveis! Voce perdeu!");
+                    if (jog_atual == 1) {
+                        printf(VRML "%s" CNZA ", todas as suas pecas foram eliminadas! Voce perdeu...\n", nome_jogador1);
+                        printf(VERD "%s" CNZA " ganhou essa partida!\n", nome_jogador2);
+                    } else {
+                        printf(VERD "%s" CNZA ", todas as suas pecas foram eliminadas! Voce perdeu...\n", nome_jogador2);
+                        printf(VRML "%s" CNZA " ganhou essa partida!\n", nome_jogador1);
+                    }
+                    sleep(2);
                     game = false; break;
                 }
 
@@ -98,7 +105,7 @@ int main(void) {
                         printf(VERD "%s" CNZA ", suas pecas estao todas sem movimento! Voce perdeu...\n", nome_jogador2);
                         printf(VRML "%s" CNZA " ganhou essa partida!\n", nome_jogador1);
                     }
-                    sleep(1);
+                    sleep(2);
                     game = false; break;
                 }
 
@@ -133,6 +140,7 @@ int main(void) {
                 trocar_turno(&jog_atual);
             }
         case 'S': puts("Saindo do jogo... Obrigado por jogar Dablot :) ");
+        sleep(3);
     }
     return EXIT_SUCCESS;
 }
@@ -175,8 +183,10 @@ bool verificar_pecas_livres(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], const int
 int sortear_jogador(void) {
     srand(time(0));
     int sorteio = rand() % 2 + 1;
-    printf(CNZA "O jogador %d foi sorteado para comecar dessa vez...\n", sorteio);
+    puts(CNZA "Vamos sortear quem vai comecar jogando...");
     sleep(1);
+    printf("O jogador %d foi sorteado para comecar dessa vez...\n", sorteio);
+    sleep(2);
     return sorteio;
 }
 
@@ -604,7 +614,7 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
     // Jogador 1 verificar se { F, f, c }
     // Jogador 2 verificar se { R, p, g }
 
-    if (peca[x] % 2 == 0) {
+    if (peca[y] % 2 == 0) {
         if (movimento->N[y] >= LIM_SUPERIOR) {
             switch(matriz_posicao[peca[x]][peca[y]]) {
                 case 'R':
@@ -1021,7 +1031,7 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
         // Se tiver um espaço, habilitar (true)
         // Se não tiver espaço, desabilitar (false)
 
-    if (peca[x] % 2 == 0) {
+    if (peca[y] % 2 == 0) {
         if ((movimento->iN == -1) && (captura->N[y] >= LIM_SUPERIOR) && (matriz_posicao[captura->N[x]][captura->N[y]] == ' ')) captura->iN = 1;
         if ((movimento->iS == -1) && (captura->S[y] <= LIM_INFERIOR) && (matriz_posicao[captura->S[x]][captura->S[y]] == ' ')) captura->iS = 1;
         if ((movimento->iE == -1) && (captura->E[x] <= LIM_DIREITO) && (matriz_posicao[captura->E[x]][captura->E[y]] == ' ')) captura->iE = 1;
@@ -1108,7 +1118,7 @@ bool validar_destino(const int peca[], const int dest[], char matriz_posicao[TAM
     // Se não for de nenhuma coordenada de movimento cardeal, validar se é alguma coordenada de captura
     // Para ser uma captura válida, a cardeal de movimento == -1 e a cardeal de captura == 1
     // Se for captura válida, chamar a função capturar_peca(<posição movimento cardeal equivalente>)
-    if (peca[x] % 2 == 0) {
+    if (peca[y] % 2 == 0) {
         if ((((dest[x] == movimento.N[x]) && (dest[y] == movimento.N[y]) && (movimento.iN == 1)))
         || (((dest[x] == movimento.S[x]) && (dest[y] == movimento.S[y]) && (movimento.iS == 1)))
         || (((dest[x] == movimento.E[x]) && (dest[y] == movimento.E[y]) && (movimento.iE == 1)))
