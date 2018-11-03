@@ -32,6 +32,7 @@
 bool validar_alcance(const int[*], const char[TAM_X_TAB][TAM_Y_TAB], pontoCardeal*, pontoCardeal*);
 bool validar_destino(const int[*], const int[*], char[TAM_X_TAB][TAM_Y_TAB], pontoCardeal, pontoCardeal, char[*], char[*]);
 bool validar_peca(const int*, const int[*], const char[TAM_X_TAB][TAM_Y_TAB]);
+bool verificar_pecas_livres(char[TAM_X_TAB][TAM_Y_TAB], const int*, int[*], pontoCardeal*, pontoCardeal*);
 char menu_inicial(void);
 char menu_pausa(void);
 int carregar_jogo(char[TAM_X_TAB][TAM_Y_TAB], char[*], char[*], char[*], char[*], int*, size_t, bool*);
@@ -55,7 +56,7 @@ int main(void) {
     char matriz_posicao[TAM_X_TAB][TAM_Y_TAB];
     char nome_jogador1[TAM_NOME], nome_jogador2[TAM_NOME];
     char pecas_jog1[TAM_VETOR], pecas_jog2[TAM_VETOR];
-    int jog_atual = sortear_jogador();
+    int jog_atual = 0;
     int peca[2], dest[2];
 
     // Posições cardeais de movimento e captura
@@ -79,9 +80,28 @@ int main(void) {
                 carregar_jogo(matriz_posicao, nome_jogador1, pecas_jog1, nome_jogador2, pecas_jog2, &jog_atual, TAM_VETOR, &game);
             } else {
                 comecar_jogo(nome_jogador1, nome_jogador2, &game);
+                jog_atual = sortear_jogador();
             }
             while (game) {
                 imprimir_tabuleiro(matriz_posicao);
+
+                if (!verificar_vetor_pecas(pecas_jog1, pecas_jog2, TAM_VETOR, &jog_atual)) {
+                    puts("Voce ficou sem movimentos possiveis! Voce perdeu!");
+                    game = false; break;
+                }
+
+                if (!verificar_pecas_livres(matriz_posicao, &jog_atual, peca, &movimento, &captura)) {
+                    if (jog_atual == 1) {
+                        printf(VRML "%s" CNZA ", suas pecas estao todas sem movimento! Voce perdeu...\n", nome_jogador1);
+                        printf(VERD "%s" CNZA " ganhou essa partida!\n", nome_jogador2);
+                    } else {
+                        printf(VERD "%s" CNZA ", suas pecas estao todas sem movimento! Voce perdeu...\n", nome_jogador2);
+                        printf(VRML "%s" CNZA " ganhou essa partida!\n", nome_jogador1);
+                    }
+                    sleep(1);
+                    game = false; break;
+                }
+
                 if (!pedir_entrada(&jog_atual, peca, nome_jogador1, nome_jogador2)) {
                     switch(menu_pausa()) {
                         case 'V': continue;
@@ -98,7 +118,11 @@ int main(void) {
                 }
                 if (!validar_peca(&jog_atual, peca, matriz_posicao)) continue;
 
-                if (!validar_alcance(peca, matriz_posicao, &movimento, &captura)) continue;
+                if (!validar_alcance(peca, matriz_posicao, &movimento, &captura)) {
+                    puts("Essa peca nao pode se mover, tente outra...");
+                    sleep(2);
+                    continue;
+                }
 
                 pedir_destino(dest);
 
@@ -107,28 +131,52 @@ int main(void) {
                 fazer_jogada(matriz_posicao, peca, dest);
 
                 trocar_turno(&jog_atual);
-
-                if (!verificar_vetor_pecas(pecas_jog1, pecas_jog2, TAM_VETOR, &jog_atual)) {
-                    puts("Voce ficou sem movimentos possiveis! Voce perdeu!");
-                    game = false; break;
-                }
             }
-        case 'S': puts("Saindo do jogo...");
+        case 'S': puts("Saindo do jogo... Obrigado por jogar Dablot :) ");
     }
     return EXIT_SUCCESS;
 }
 
-bool verificar_pecas_livres() {
-    // Receber a matriz, o jogador atual e seu vetor de peças
-    // Rodar a função verificar_alcance() num loop para todas as peças
-    // Caso verificar_alcance() retorne verdadeiro, sair do laço e retornar verdadeiro
-    // Caso verificar_alcance() retorne falso, continuar verificando até chegar na última peça
+bool verificar_pecas_livres(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], const int *jog_atual, int peca[], pontoCardeal *movimento, pontoCardeal *captura) {
+    // Rodar a função validar_alcance() num loop para todas as peças do jogador atual na matriz
+    // Caso validar_alcance() retorne verdadeiro, sair do laço e retornar verdadeiro
+    // Caso validar_alcance() retorne falso, continuar verificando até chegar na última peça
     // Caso a última também retorne falso, todas as peças estão bloqueadas, retornar falso, esse jogador perdeu o jogo
+    int x, y;
+    const int X = 0;
+    const int Y = 1;
+
+    for (y = 0; y < TAM_Y_TAB; ++y) {
+        for (x = 0; x < TAM_X_TAB; ++x) {
+            if (*jog_atual == 1) {
+                switch(matriz_posicao[x][y]) {
+                    case 'R': case 'p': case 'g':
+                    peca[X] = x;
+                    peca[Y] = y;
+                    if (validar_alcance(peca, matriz_posicao, movimento, captura)) {
+                        return true;
+                    }
+                }
+            } else {
+                switch(matriz_posicao[x][y]) {
+                    case 'F': case 'f': case 'c':
+                    peca[X] = x;
+                    peca[Y] = y;
+                    if (validar_alcance(peca, matriz_posicao, movimento, captura)) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
 }
 
 int sortear_jogador(void) {
     srand(time(0));
     int sorteio = rand() % 2 + 1;
+    printf(CNZA "O jogador %d foi sorteado para comecar dessa vez...\n", sorteio);
+    sleep(1);
     return sorteio;
 }
 
@@ -996,8 +1044,6 @@ bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_
     // Se todas as posições cardeais de movimento e captura forem 0 ou -1, o movimento da peça é impossível
     if (((movimento->iN < 1) && (movimento->iS < 1) && (movimento->iE < 1) && (movimento->iO < 1) && (movimento->iNE < 1) && (movimento->iSE < 1) && (movimento->iSO < 1) && (movimento->iNO < 1))
         && ((captura->iN < 1) && (captura->iS < 1) && (captura->iE < 1) && (captura->iO < 1) && (captura->iNE < 1) && (captura->iSE < 1) && (captura->iSO < 1) && (captura->iNO < 1))) {
-        puts("Essa peca nao pode se mover, tente outra...");
-        sleep(2);
         return false;
     } else {        
     return true;
