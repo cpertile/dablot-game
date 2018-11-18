@@ -20,7 +20,6 @@
 
 #define AMRL "\x1B[33m"
 #define AZUL "\x1B[34m"
-#define BCPT "\x1B[30;47m"
 #define BNCO "\x1B[37m"
 #define CIAN "\x1B[96m"
 #define CNZA "\x1B[90m"
@@ -29,26 +28,26 @@
 #define VRML "\x1B[91m"
 #define RST  "\x1B[0m"
 
-bool validar_alcance(const int[*], const char[TAM_X_TAB][TAM_Y_TAB], pontoCardeal*, pontoCardeal*);
-bool validar_destino(const int[*], const int[*], char[TAM_X_TAB][TAM_Y_TAB], pontoCardeal, pontoCardeal, char[*], char[*]);
-bool validar_peca(const int*, const int[*], const char[TAM_X_TAB][TAM_Y_TAB]);
+bool validar_alcance(const int[*], size_t, size_t, const char[*][*], pontoCardeal*, pontoCardeal*);
+bool validar_destino(const int[*], const int[*], size_t, size_t, char[*][*], pontoCardeal, pontoCardeal, char[*], char[*]);
+bool validar_peca(const int*, const int[*], size_t, size_t, const char[*][*]);
 bool verificar_desistencia(int, char[*], char[*], size_t, char[*], char[*], size_t);
-bool verificar_pecas_livres(char[TAM_X_TAB][TAM_Y_TAB], const int*, int[*], pontoCardeal*, pontoCardeal*);
+bool verificar_pecas_livres(size_t, size_t, char[*][*], const int*, int[*], pontoCardeal*, pontoCardeal*);
 char menu_inicial(void);
 char menu_pausa(void);
-int carregar_jogo(char[TAM_X_TAB][TAM_Y_TAB], char[*], char[*], char[*], char[*], int*, size_t, bool*);
+int carregar_jogo(size_t, size_t, char[*][*], char[*], char[*], char[*], char[*], int*, bool*);
 int pedir_entrada(const int*, int[*], char[*], char[*]);
-int salvar_jogo(char[TAM_X_TAB][TAM_Y_TAB], char[*], char[*], char[*], char[*], int*, size_t);
+int salvar_jogo(size_t, size_t, char[*][*], char[*], char[*], char[*], char[*], int*);
 int sortear_jogador(void);
 int verificar_vetor_pecas(char[*], char[*], size_t, int*);
-void capturar_peca(int[*], char[TAM_X_TAB][TAM_Y_TAB], char[*], char[*]);
+void capturar_peca(int[*], size_t, size_t, char[*][*], size_t, char[*], char[*]);
 void comecar_jogo(char[*], char[*], bool*);
-void fazer_jogada(char[TAM_X_TAB][TAM_Y_TAB], const int[*], const int [*]);
-void imprimir_tabuleiro(const char[TAM_X_TAB][TAM_Y_TAB]);
-void inicializar_matriz_posicao(char[*], char[*], size_t, char[TAM_X_TAB][TAM_Y_TAB]);
+void fazer_jogada(size_t, size_t, char[*][*], const int[*], const int[*]);
+void imprimir_tabuleiro(size_t, size_t, const char[*][*]);
+void inicializar_matriz_posicao(char[*], char[*], size_t, size_t, size_t, char[*][*]);
 void inicializar_vetor_pecas(char[*], char[*], size_t);
 void pedir_destino(int[*]);
-void reiniciar_partida(char[TAM_X_TAB][TAM_Y_TAB], char[*], char[*], size_t);
+void reiniciar_partida(size_t, size_t, char[*][*], char[*], char[*], size_t);
 void trocar_turno(int*);
 void tutorial(void);
 
@@ -69,7 +68,7 @@ int main(void) {
     inicializar_vetor_pecas(pecas_jog1, pecas_jog2, TAM_VETOR);
 
     // Inicialização da matriz de posições
-    inicializar_matriz_posicao(pecas_jog1, pecas_jog2, TAM_VETOR, matriz_posicao);
+    inicializar_matriz_posicao(pecas_jog1, pecas_jog2, TAM_VETOR, TAM_X_TAB, TAM_Y_TAB, matriz_posicao);
     
     // Chamada do menu inicial para início do jogo
     char escolha = menu_inicial();
@@ -78,13 +77,13 @@ int main(void) {
         case 'C':
         case 'N':
             if (escolha == 'C') {
-                carregar_jogo(matriz_posicao, nome_jogador1, pecas_jog1, nome_jogador2, pecas_jog2, &jog_atual, TAM_VETOR, &game);
+                carregar_jogo(TAM_X_TAB, TAM_Y_TAB, matriz_posicao, nome_jogador1, pecas_jog1, nome_jogador2, pecas_jog2, &jog_atual, &game);
             } else {
                 comecar_jogo(nome_jogador1, nome_jogador2, &game);
                 jog_atual = sortear_jogador();
             }
             while (game) {
-                imprimir_tabuleiro(matriz_posicao);
+                imprimir_tabuleiro(TAM_X_TAB, TAM_Y_TAB, matriz_posicao);
 
                 if (!verificar_vetor_pecas(pecas_jog1, pecas_jog2, TAM_VETOR, &jog_atual)) {
                     if (jog_atual == 1) {
@@ -98,7 +97,7 @@ int main(void) {
                     game = false; break;
                 }
 
-                if (!verificar_pecas_livres(matriz_posicao, &jog_atual, peca, &movimento, &captura)) {
+                if (!verificar_pecas_livres(TAM_X_TAB, TAM_Y_TAB, matriz_posicao, &jog_atual, peca, &movimento, &captura)) {
                     if (jog_atual == 1) {
                         printf(VRML "%s" CNZA ", suas pecas estao todas sem movimento! Voce perdeu...\n", nome_jogador1);
                         printf(VERD "%s" CNZA " ganhou essa partida!\n", nome_jogador2);
@@ -118,26 +117,26 @@ int main(void) {
                 if (!pedir_entrada(&jog_atual, peca, nome_jogador1, nome_jogador2)) {
                     switch(menu_pausa()) {
                         case 'V': continue;
-                        case 'C': carregar_jogo(matriz_posicao, nome_jogador1, pecas_jog1, nome_jogador2, pecas_jog2, &jog_atual, TAM_VETOR, &game); continue;
-                        case 'S': salvar_jogo(matriz_posicao, nome_jogador1, pecas_jog1, nome_jogador2, pecas_jog2, &jog_atual, TAM_VETOR); continue;
-                        case 'R': reiniciar_partida(matriz_posicao, pecas_jog1, pecas_jog2, TAM_VETOR); jog_atual = sortear_jogador(); continue;
-                        case 'X': reiniciar_partida(matriz_posicao, pecas_jog1, pecas_jog2, TAM_VETOR); jog_atual = sortear_jogador();
+                        case 'C': carregar_jogo(TAM_X_TAB, TAM_Y_TAB, matriz_posicao, nome_jogador1, pecas_jog1, nome_jogador2, pecas_jog2, &jog_atual, &game); continue;
+                        case 'S': salvar_jogo(TAM_X_TAB, TAM_Y_TAB, matriz_posicao, nome_jogador1, pecas_jog1, nome_jogador2, pecas_jog2, &jog_atual); continue;
+                        case 'R': reiniciar_partida(TAM_X_TAB, TAM_Y_TAB, matriz_posicao, pecas_jog1, pecas_jog2, TAM_VETOR); jog_atual = sortear_jogador(); continue;
+                        case 'X': reiniciar_partida(TAM_X_TAB, TAM_Y_TAB, matriz_posicao, pecas_jog1, pecas_jog2, TAM_VETOR); jog_atual = sortear_jogador();
                         comecar_jogo(nome_jogador1, nome_jogador2, &game); continue;
                         case '0': game = false; continue;
                     }
                 }
 
-                if (!validar_peca(&jog_atual, peca, matriz_posicao)) continue;
+                if (!validar_peca(&jog_atual, peca, TAM_X_TAB, TAM_Y_TAB, matriz_posicao)) continue;
 
-                if (!validar_alcance(peca, matriz_posicao, &movimento, &captura)) {
+                if (!validar_alcance(peca, TAM_X_TAB, TAM_Y_TAB, matriz_posicao, &movimento, &captura)) {
                     puts("Essa peca nao pode se mover, tente outra...");
                     sleep(2);
                     continue;
                 }
 
                 pedir_destino(dest);
-                if (!validar_destino(peca, dest, matriz_posicao, movimento, captura, pecas_jog1, pecas_jog2)) continue;
-                fazer_jogada(matriz_posicao, peca, dest);
+                if (!validar_destino(peca, dest, TAM_X_TAB, TAM_Y_TAB, matriz_posicao, movimento, captura, pecas_jog1, pecas_jog2)) continue;
+                fazer_jogada(TAM_X_TAB, TAM_Y_TAB, matriz_posicao, peca, dest);
                 trocar_turno(&jog_atual);
             }
         case 'S': puts("Saindo do jogo... Obrigado por jogar Dablot :) ");
@@ -251,13 +250,13 @@ bool verificar_desistencia(int jog_atual, char nome_jogador1[], char nome_jogado
     char pecas_jog1[], char pecas_jog2[], size_t tam_vetor_pecas) {
     // Verificar nos vetores peças se o jogador perdeu sua peça mais significativa ('R' ou 'F') e perguntar se deseja desistir do jogo
     // Se for jogador 1, vai olhar para o vetor de peças 1 na posição do 'R'
-    // Jogador 2, olha o vetor de peças 2 na posição 'F'
+    // Jogador 2, olha o vetor de peças 2 na posição do 'F'
     char escolha = '?';
 
     if (jog_atual == 1) {
-        if (pecas_jog1[tam_vetor_pecas-1] != 'R') {
+        if (pecas_jog1[tam_vetor_pecas - 1] != 'R') {
             while ((escolha != 'S') && (escolha != 'N')) {
-                printf(VRML "%s" CNZA ", o Rei foi eliminado... Deseja desistir do jogo? [ (S) - (N) ]", nome_jogador1);
+                printf(VRML "%s" CNZA ", o Rei foi eliminado... Deseja desistir do jogo? (S) / (N) ", nome_jogador1);
                 scanf(" %c", &escolha);
                 escolha = toupper(escolha);
                 switch (escolha) {
@@ -268,9 +267,9 @@ bool verificar_desistencia(int jog_atual, char nome_jogador1[], char nome_jogado
             }
         }
     } else {
-        if (pecas_jog2[tam_vetor_pecas-1] != 'F') {
+        if (pecas_jog2[tam_vetor_pecas - 1] != 'F') {
             while ((escolha != 'S') && (escolha != 'N')) {
-                printf(VERD "%s" CNZA ", o Fazendeiro foi eliminado... Deseja desistir do jogo? [ (S) - (N) ]", nome_jogador2);
+                printf(VERD "%s" CNZA ", o Fazendeiro foi eliminado... Deseja desistir do jogo? (S) / (N) ", nome_jogador2);
                 scanf(" %c", &escolha);
                 escolha = toupper(escolha);
                 switch (escolha) {
@@ -285,7 +284,7 @@ bool verificar_desistencia(int jog_atual, char nome_jogador1[], char nome_jogado
 
 }
 
-bool verificar_pecas_livres(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], const int *jog_atual, int peca[], pontoCardeal *movimento, pontoCardeal *captura) {
+bool verificar_pecas_livres(size_t tam_x, size_t tam_y, char matriz_posicao[tam_x][tam_y], const int *jog_atual, int peca[], pontoCardeal *movimento, pontoCardeal *captura) {
     // Rodar a função validar_alcance() num loop para todas as peças do jogador atual na matriz
     // Caso validar_alcance() retorne verdadeiro, sair do laço e retornar verdadeiro
     // Caso validar_alcance() retorne falso, continuar verificando até chegar na última peça
@@ -294,14 +293,14 @@ bool verificar_pecas_livres(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], const int
     const int X = 0;
     const int Y = 1;
 
-    for (y = 0; y < TAM_Y_TAB; ++y) {
-        for (x = 0; x < TAM_X_TAB; ++x) {
+    for (y = 0; y < tam_y; ++y) {
+        for (x = 0; x < tam_x; ++x) {
             if (*jog_atual == 1) {
                 switch(matriz_posicao[x][y]) {
                     case 'R': case 'p': case 'g':
                     peca[X] = x;
                     peca[Y] = y;
-                    if (validar_alcance(peca, matriz_posicao, movimento, captura)) {
+                    if (validar_alcance(peca, TAM_X_TAB, TAM_Y_TAB, matriz_posicao, movimento, captura)) {
                         return true;
                     }
                 }
@@ -310,7 +309,7 @@ bool verificar_pecas_livres(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], const int
                     case 'F': case 'f': case 'c':
                     peca[X] = x;
                     peca[Y] = y;
-                    if (validar_alcance(peca, matriz_posicao, movimento, captura)) {
+                    if (validar_alcance(peca, TAM_X_TAB, TAM_Y_TAB, matriz_posicao, movimento, captura)) {
                         return true;
                     }
                 }
@@ -330,7 +329,7 @@ int sortear_jogador(void) {
     return sorteio;
 }
 
-char menu_inicial() {
+char menu_inicial(void) {
     char escolha = '?';
 
     // Limpa a tela e imprime o menu inicial do jogo
@@ -424,7 +423,7 @@ void inicializar_vetor_pecas(char V1[], char V2[], size_t tam) {
     }
 }
 
-void inicializar_matriz_posicao(char V1[], char V2[], size_t tam, char pos[TAM_X_TAB][TAM_Y_TAB]) {
+void inicializar_matriz_posicao(char V1[], char V2[], size_t tam, size_t tam_x, size_t tam_y, char pos[tam_x][tam_y]) {
     // Preenche as posições com as peças
     // Linhas pares = colunas pares
     // Linhas ímpares = colunas ímpares
@@ -433,7 +432,7 @@ void inicializar_matriz_posicao(char V1[], char V2[], size_t tam, char pos[TAM_X
 
     // Para cada linha, da 0 até a 4
     for (y = 0; y < 5; ++y) {
-        for (x = 0; x < TAM_X_TAB; x++) {
+        for (x = 0; x < tam_x; x++) {
             if (y % 2 == 0) {
                 if (x % 2 == 0) {
                     pos[x][y] = V1[i];  // Se a linha for par e a coluna for par, coloque a peça do vetor na matriz
@@ -454,7 +453,7 @@ void inicializar_matriz_posicao(char V1[], char V2[], size_t tam, char pos[TAM_X
 
     // Para cada linha, da 12 até a 8
     for (y = 12; y > 7; --y) {
-        for (x = 0; x < TAM_X_TAB; x++) {
+        for (x = 0; x < tam_x; x++) {
             if (y % 2 == 0) {
                 if (x % 2 == 0) {
                     pos[x][y] = V2[j];  // Se a linha for par e a coluna for par, coloque a peça do vetor na matriz
@@ -475,12 +474,12 @@ void inicializar_matriz_posicao(char V1[], char V2[], size_t tam, char pos[TAM_X
 
     // Para a linha 5, se a coluna for par recebe 0
     // Se a coluna for ímpar, se for 1 recebe V1[28], se for outro número recebe espaço (' ')
-    for (x = 0; x < TAM_X_TAB; x++) {
+    for (x = 0; x < tam_x; x++) {
         if (x % 2 == 0) {
             pos[x][5] = '0';
         } else {
             if (x == 1) {
-                pos[x][5] = V1[tam-2];
+                pos[x][5] = V1[tam - 2];
             } else {
                 pos[x][5] = ' ';            
             }
@@ -489,14 +488,14 @@ void inicializar_matriz_posicao(char V1[], char V2[], size_t tam, char pos[TAM_X
 
     // Para a linha 6, se a coluna for ímpar, recebe 0
     // Se a coluna for par e 0, coloque a peça V1[29] na posição pos[0][6], se for 10, a peça V2[29] na pos[10][6], e outro núm recebe espaço (' ')
-    for (x = 0; x < TAM_X_TAB; x++) {
+    for (x = 0; x < tam_x; x++) {
         if (x % 2 == 1) {
             pos[x][6] = '0';
         } else {
             if (x == 0) {
-                pos[x][6] = V1[tam-1];
+                pos[x][6] = V1[tam - 1];
             } else if (x == 10) {
-                pos[x][6] = V2[tam-1];
+                pos[x][6] = V2[tam - 1];
             } else {
                 pos[x][6] = ' ';            
             }
@@ -505,12 +504,12 @@ void inicializar_matriz_posicao(char V1[], char V2[], size_t tam, char pos[TAM_X
     
     // Para a linha 7, se a coluna for par recebe 0
     // Se a coluna for ímpar, se for 9 recebe a peça V2[28], se não recebe espaço (' ')
-    for (x = 0; x < TAM_X_TAB; x++) {
+    for (x = 0; x < tam_x; x++) {
         if (x % 2 == 0) {
             pos[x][7] = '0';
         } else {
             if (x == 9) {
-                pos[x][7] = V2[tam-2];
+                pos[x][7] = V2[tam - 2];
             } else {
                 pos[x][7] = ' ';
             }
@@ -545,38 +544,33 @@ void comecar_jogo(char nome_jogador1[], char nome_jogador2[], bool *game) {
     }
 }
 
-void reiniciar_partida(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], char pecas_jog1[], char pecas_jog2[], size_t tam) {
+void reiniciar_partida(size_t tam_x, size_t tam_y, char matriz_posicao[tam_x][tam_y], char pecas_jog1[], char pecas_jog2[], size_t tam) {
     system("clear");
     puts("Reiniciando, aguarde...");
     sleep(1);
-    inicializar_vetor_pecas(pecas_jog1, pecas_jog2, TAM_VETOR);
-    inicializar_matriz_posicao(pecas_jog1, pecas_jog2, TAM_VETOR, matriz_posicao);
+    inicializar_vetor_pecas(pecas_jog1, pecas_jog2, tam);
+    inicializar_matriz_posicao(pecas_jog1, pecas_jog2, tam, tam_x, tam_y, matriz_posicao);
 }
 
-void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
+void imprimir_tabuleiro(size_t tam_x, size_t tam_y, const char T[tam_x][tam_y]) {
     // Imprime em tela o tabuleiro, sendo a matriz de posições + as strings da moldura
-    // Se T[x][y] != '0', imprima em tela. Se == '0', imprima a string separadora
-    // TODO: Usar %2d nos números para alinhas corretamente
+    // Se T[x][y] != '0', imprima o conteúdo em tela. Se == '0', imprima a string separadora
     int x, y;
     
-    // Limpa a tela e printa o cabeçalho
+    // Limpa a tela e imprime o cabeçalho
     system("clear");
     putchar('\n');
     puts(CNZA "  @╔═════════════════════════════════════════╗");
     puts(CNZA "  @║     "RST"A  "CNZA"B  "RST"C  "CNZA"D  "RST"E  "CNZA"F  "RST"G  "CNZA"H  "RST"I  "CNZA"J  "RST"K     "CNZA"║");
     
     // Para cada linha, se o índice da linha for par ou ímpar, acontece algo diferente
-    for (y = 0; y < TAM_Y_TAB; y++) {
+    for (y = 0; y < tam_y; y++) {
         if (y % 2 == 0) {
             // Linha índice par (y = 0, linha = 1)
             // Imprime as coordenadas numerais da borda esquerda
-            if (y < 10) {
-                printf(CNZA "  @║" RST "  %d " CNZA "[", y+1);
-            } else {
-                printf(CNZA "  @║" RST " %d " CNZA "[", y+1);
-            }
+            printf(CNZA "  @║" RST " %2d " CNZA "[", y+1);
             // Imprime ou uma peça ou um separador
-            for (x = 0; x < TAM_X_TAB; x++) {
+            for (x = 0; x < tam_x; x++) {
                 if (T[x][y] != '0') {
                     switch(T[x][y]) {
                         case ' ': putchar(T[x][y]); break;
@@ -587,22 +581,14 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
                     printf(CNZA "]---[");
                 }
             }
-            if (y < 10) {
-                printf(CNZA "]" RST " %d  " CNZA "║\n", y+1);
-            } else {
-                printf(CNZA "]" RST " %d " CNZA "║\n", y+1);
-            }
+            printf(CNZA "]" RST " %2d " CNZA "║\n", y+1);
             if (y < 12) {
                 puts(CNZA "  @║     | \\ / | \\ / | \\ / | \\ / | \\ / |     ║");
             }
         } else {
             // Linha índice ímpar (y = 1, linha = 2)
-            if (y < 9) {
-                printf(CNZA"  @║  %d  | [", y+1);                
-            } else {
-                printf(CNZA"  @║ %d  | [", y+1);                
-            }
-            for (x = 1; x < TAM_X_TAB-1; x++) {
+            printf(CNZA"  @║ %2d  | [", y+1);
+            for (x = 1; x < tam_x - 1; x++) {
                 if (T[x][y] != '0') {
                     switch(T[x][y]) {
                         case ' ': putchar(T[x][y]); break;
@@ -613,11 +599,7 @@ void imprimir_tabuleiro(const char T[TAM_X_TAB][TAM_Y_TAB]) {
                     printf(CNZA"] | [");
                 }
             }
-            if (y < 9) {
-                printf(CNZA "] |  %d  ║\n", y+1);               
-            } else {
-                printf(CNZA "] |  %d ║\n", y+1);               
-            }
+            printf(CNZA "] |  %2d ║\n", y+1);
             puts(CNZA "  @║     | / \\ | / \\ | / \\ | / \\ | / \\ |     ║");
         }
     }
@@ -666,7 +648,7 @@ int pedir_entrada(const int *jog_atual, int peca[], char nome_jogador1[], char n
     return 1;
 }
 
-bool validar_peca(const int *jog_atual, const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_Y_TAB]) {
+bool validar_peca(const int *jog_atual, const int peca[], size_t tam_x, size_t tam_y, const char matriz_posicao[tam_x][tam_y]) {
     const int x = 0, y = 1;
     // 1ª parte: validar se as coordenadas estão dentro do tabuleiro. Se não estiverem, retornar false
     // Princípio Coluna par Linha par / Coluna ímpar linha ímpar
@@ -691,7 +673,6 @@ bool validar_peca(const int *jog_atual, const int peca[], const char matriz_posi
 
     // 2ª parte: validar o time da peça escolhida
     // Retornar falso se o jogador 1 escolher { F, f, c } ou se o jogador 2 escolher { R, p, g }
-    // Retornar falso se qualquer jogador escolher um espaço
 
     if (*jog_atual == 1) {
         if ((matriz_posicao[peca[x]][peca[y]] == 'F') || (matriz_posicao[peca[x]][peca[y]] == 'f') || (matriz_posicao[peca[x]][peca[y]] == 'c')) {
@@ -707,6 +688,8 @@ bool validar_peca(const int *jog_atual, const int peca[], const char matriz_posi
         }
     }
 
+    // 3ª Parte: retornar falso se qualquer jogador escolher um espaço
+
     if (matriz_posicao[peca[x]][peca[y]] == ' ') {
         puts("Essa posicao estah vazia...");
         sleep(2);
@@ -715,8 +698,7 @@ bool validar_peca(const int *jog_atual, const int peca[], const char matriz_posi
     return true;
 }
 
-bool validar_alcance(const int peca[], const char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], pontoCardeal * movimento, pontoCardeal * captura) {
-    // TODO: Criar struct pontos_cardeais; pontos_subcardeais (?)
+bool validar_alcance(const int peca[], size_t tam_x, size_t tam_y, const char matriz_posicao[tam_x][tam_y], pontoCardeal * movimento, pontoCardeal * captura) {
     const int x = 0, y = 1;
     // Retornar true se a peça pode se mover. Se ela não puder, retornar mensagem de erro e false
 
@@ -1213,6 +1195,8 @@ void pedir_destino(int dest[]) {
     scanf(" %c", &coord_x_l_dest);
     scanf("%d", &coord_y_dest);
     coord_x_l_dest = toupper(coord_x_l_dest);
+
+    // Troca a coordenada alfabética digitada por uma coordenada numérica
     switch(coord_x_l_dest) {
         case 'A': coord_x_n_dest = 0; break;
         case 'B': coord_x_n_dest = 1; break;
@@ -1234,7 +1218,7 @@ void pedir_destino(int dest[]) {
     dest[y] = coord_y_dest;
 }
 
-bool validar_destino(const int peca[], const int dest[], char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], pontoCardeal movimento, pontoCardeal captura, char pecas_jog1[], char pecas_jog2[]) {
+bool validar_destino(const int peca[], const int dest[], size_t tam_x, size_t tam_y, char matriz_posicao[tam_x][tam_y], pontoCardeal movimento, pontoCardeal captura, char pecas_jog1[], char pecas_jog2[]) {
     const int x = 0, y = 1;
     // Retornar 0 para destino inválido, 1 para movimento normal, 2 para movimento de captura
     // 1ª parte: validar se o destino está dentro do tabuleiro. Se não estiver, retornar false
@@ -1273,35 +1257,35 @@ bool validar_destino(const int peca[], const int dest[], char matriz_posicao[TAM
             return true;            
         } else {
             if ((dest[x] == captura.N[x]) && (dest[y] == captura.N[y]) && (movimento.iN == -1) && (captura.iN == 1)) {
-                capturar_peca(movimento.N, matriz_posicao, pecas_jog1, pecas_jog2);
+                capturar_peca(movimento.N, TAM_X_TAB, TAM_Y_TAB, matriz_posicao, TAM_VETOR, pecas_jog1, pecas_jog2);
                 return true;
             }
             if ((dest[x] == captura.S[x]) && (dest[y] == captura.S[y]) && (movimento.iS == -1) && (captura.iS == 1)) {
-                capturar_peca(movimento.S, matriz_posicao, pecas_jog1, pecas_jog2);
+                capturar_peca(movimento.S, TAM_X_TAB, TAM_Y_TAB, matriz_posicao, TAM_VETOR, pecas_jog1, pecas_jog2);
                 return true;
             }
             if ((dest[x] == captura.E[x]) && (dest[y] == captura.E[y]) && (movimento.iE == -1) && (captura.iE == 1)) {
-                capturar_peca(movimento.E, matriz_posicao, pecas_jog1, pecas_jog2);
+                capturar_peca(movimento.E, TAM_X_TAB, TAM_Y_TAB, matriz_posicao, TAM_VETOR, pecas_jog1, pecas_jog2);
                 return true;
             }
             if ((dest[x] == captura.O[x]) && (dest[y] == captura.O[y]) && (movimento.iO == -1) && (captura.iO == 1)) {
-                capturar_peca(movimento.O, matriz_posicao, pecas_jog1, pecas_jog2);
+                capturar_peca(movimento.O, TAM_X_TAB, TAM_Y_TAB, matriz_posicao, TAM_VETOR, pecas_jog1, pecas_jog2);
                 return true;
             }
             if ((dest[x] == captura.NE[x]) && (dest[y] == captura.NE[y]) && (movimento.iNE == -1) && (captura.iNE == 1)) {
-                capturar_peca(movimento.NE, matriz_posicao, pecas_jog1, pecas_jog2);
+                capturar_peca(movimento.NE, TAM_X_TAB, TAM_Y_TAB, matriz_posicao, TAM_VETOR, pecas_jog1, pecas_jog2);
                 return true;
             }
             if ((dest[x] == captura.SE[x]) && (dest[y] == captura.SE[y]) && (movimento.iSE == -1) && (captura.iSE == 1)) {
-                capturar_peca(movimento.SE, matriz_posicao, pecas_jog1, pecas_jog2);
+                capturar_peca(movimento.SE, TAM_X_TAB, TAM_Y_TAB, matriz_posicao, TAM_VETOR, pecas_jog1, pecas_jog2);
                 return true;
             }
             if ((dest[x] == captura.SO[x]) && (dest[y] == captura.SO[y]) && (movimento.iSO == -1) && (captura.iSO == 1)) {
-                capturar_peca(movimento.SO, matriz_posicao, pecas_jog1, pecas_jog2);
+                capturar_peca(movimento.SO, TAM_X_TAB, TAM_Y_TAB, matriz_posicao, TAM_VETOR, pecas_jog1, pecas_jog2);
                 return true;
             }
             if ((dest[x] == captura.NO[x]) && (dest[y] == captura.NO[y]) && (movimento.iNO == -1) && (captura.iNO == 1)) {
-                capturar_peca(movimento.NO, matriz_posicao, pecas_jog1, pecas_jog2);
+                capturar_peca(movimento.NO, TAM_X_TAB, TAM_Y_TAB, matriz_posicao, TAM_VETOR, pecas_jog1, pecas_jog2);
                 return true;
             }
             puts("Destino invalido...");
@@ -1316,19 +1300,19 @@ bool validar_destino(const int peca[], const int dest[], char matriz_posicao[TAM
             return true;            
         } else {
             if ((dest[x] == captura.NE[x]) && (dest[y] == captura.NE[y]) && (movimento.iNE == -1) && (captura.iNE == 1)) {
-                capturar_peca(movimento.NE, matriz_posicao, pecas_jog1, pecas_jog2);
+                capturar_peca(movimento.NE, TAM_X_TAB, TAM_Y_TAB, matriz_posicao, TAM_VETOR, pecas_jog1, pecas_jog2);
                 return true;
             }
             if ((dest[x] == captura.SE[x]) && (dest[y] == captura.SE[y]) && (movimento.iSE == -1) && (captura.iSE == 1)) {
-                capturar_peca(movimento.SE, matriz_posicao, pecas_jog1, pecas_jog2);
+                capturar_peca(movimento.SE, TAM_X_TAB, TAM_Y_TAB, matriz_posicao, TAM_VETOR, pecas_jog1, pecas_jog2);
                 return true;
             }
             if ((dest[x] == captura.SO[x]) && (dest[y] == captura.SO[y]) && (movimento.iSO == -1) && (captura.iSO == 1)) {
-                capturar_peca(movimento.SO, matriz_posicao, pecas_jog1, pecas_jog2);
+                capturar_peca(movimento.SO, TAM_X_TAB, TAM_Y_TAB, matriz_posicao, TAM_VETOR, pecas_jog1, pecas_jog2);
                 return true;
             }
             if ((dest[x] == captura.NO[x]) && (dest[y] == captura.NO[y]) && (movimento.iNO == -1) && (captura.iNO == 1)) {
-                capturar_peca(movimento.NO, matriz_posicao, pecas_jog1, pecas_jog2);
+                capturar_peca(movimento.NO, TAM_X_TAB, TAM_Y_TAB, matriz_posicao, TAM_VETOR, pecas_jog1, pecas_jog2);
                 return true;
             }
             puts("Destino invalido...");
@@ -1343,23 +1327,26 @@ bool validar_destino(const int peca[], const int dest[], char matriz_posicao[TAM
     return false;
 }
 
-void capturar_peca(int coord_peca_capturada[], char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], char pecas_jog1[], char pecas_jog2[]) {
+void capturar_peca(int coord_peca_capturada[], size_t tam_x, size_t tam_y, char matriz_posicao[tam_x][tam_y], size_t tam_vetor, char pecas_jog1[], char pecas_jog2[]) {
+    // Verifica qual a peça capturada, e coloca um espaço em branco no seu lugar correspondente dentro do vetor de peças do jogador
+    // Para as peças g e c que se repetem, começa verificando na primeira posição e vai até a 28ª
+
     const int x = 0, y = 1;
     int i;
     switch(matriz_posicao[coord_peca_capturada[x]][coord_peca_capturada[y]]) {
-        case 'R': pecas_jog1[29] = ' '; break;
-        case 'p': pecas_jog1[28] = ' '; break;
+        case 'R': pecas_jog1[tam_vetor - 1] = ' '; break;
+        case 'p': pecas_jog1[tam_vetor - 2] = ' '; break;
         case 'g':
-            for (i = 0; i < 28;) {
+            for (i = 0; i < tam_vetor - 2;) {
                 if (pecas_jog1[i] == 'g') {
                     pecas_jog1[i] = ' ';
                     break;
                 } else { ++i; }
             }
-        case 'F': pecas_jog2[29] = ' '; break;
-        case 'f': pecas_jog2[28] = ' '; break;
+        case 'F': pecas_jog2[tam_vetor - 1] = ' '; break;
+        case 'f': pecas_jog2[tam_vetor - 2] = ' '; break;
         case 'c':
-            for (i = 0; i < 28;) {
+            for (i = 0; i < tam_vetor - 2;) {
                 if (pecas_jog2[i] == 'c') {
                     pecas_jog2[i] = ' ';
                     break;
@@ -1369,7 +1356,7 @@ void capturar_peca(int coord_peca_capturada[], char matriz_posicao[TAM_X_TAB][TA
     matriz_posicao[coord_peca_capturada[x]][coord_peca_capturada[y]] = ' ';
 }
 
-void fazer_jogada(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], const int peca[2], const int dest[2]) {
+void fazer_jogada(size_t tam_x, size_t tam_y, char matriz_posicao[tam_x][tam_y], const int peca[2], const int dest[2]) {
     const int x = 0, y = 1;
     char tmp_move_peca = matriz_posicao[dest[x]][dest[y]];
     matriz_posicao[dest[x]][dest[y]] = matriz_posicao[peca[x]][peca[y]];
@@ -1385,6 +1372,7 @@ void trocar_turno(int *jog_atual) {
 }
 
 int verificar_vetor_pecas(char pecas_jog1[], char pecas_jog2[], size_t tam, int *jog_atual) {
+	// Percorre o vetor peças de cada jogador. Caso não encontre nenhuma, é porque o jogador perdeu
     int i;
     int perdedor = 0;
     for (i = 0; i < tam; ++i) {
@@ -1409,7 +1397,7 @@ int verificar_vetor_pecas(char pecas_jog1[], char pecas_jog2[], size_t tam, int 
     return 0;
 }
 
-int salvar_jogo(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], char nome_jogador1[], char pecas_jog1[], char nome_jogador2[], char pecas_jog2[], int *jog_atual, size_t tam) {
+int salvar_jogo(size_t tam_x, size_t tam_y, char matriz_posicao[tam_x][tam_y], char nome_jogador1[], char pecas_jog1[], char nome_jogador2[], char pecas_jog2[], int *jog_atual) {
     char nome_arquivo[34];
     char caractere_matriz;
 
@@ -1445,7 +1433,7 @@ int salvar_jogo(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], char nome_jogador1[],
         fprintf(jogosalvo, "%c", caractere_matriz);
     }
     
-    // Salva os nomes dos jogadores, seus vetores de peças e 
+    // Salva os nomes dos jogadores, seus vetores de peças e o jogador atual
     fprintf(jogosalvo, "%s\n", nome_jogador1);
     fprintf(jogosalvo, "%s\n", pecas_jog1);
     fprintf(jogosalvo, "%s\n", nome_jogador2);
@@ -1458,8 +1446,7 @@ int salvar_jogo(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], char nome_jogador1[],
     return 1;
 }
 
-int carregar_jogo(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], char nome_jogador1[], char pecas_jog1[], char nome_jogador2[], char pecas_jog2[], int *jog_atual,
-    size_t tam, bool *game) {
+int carregar_jogo(size_t tam_x, size_t tam_y, char matriz_posicao[tam_x][tam_y], char nome_jogador1[], char pecas_jog1[], char nome_jogador2[], char pecas_jog2[], int *jog_atual, bool *game) {
     char caractere, descarte;
     char nome_arquivo[34];
     int i, j;
@@ -1473,16 +1460,18 @@ int carregar_jogo(char matriz_posicao[TAM_X_TAB][TAM_Y_TAB], char nome_jogador1[
             break;
         }
     }
+    // Concatena o nome do arquivo salvo com o '.txt' 
     strcat(nome_arquivo, ".txt");
     FILE * jogosalvo = fopen(nome_arquivo, "r");
     if (jogosalvo == 0) {
         perror("ERRO: nao foi possivel abrir o arquivo...");
+        sleep(2);
         return 0;
     }
 
     // Carregar matriz
-    for (j = 0; j < TAM_Y_TAB; ++j) {
-        for (i = 0; i < TAM_X_TAB; ++i) {
+    for (j = 0; j < tam_y; ++j) {
+        for (i = 0; i < tam_x; ++i) {
             caractere = fgetc(jogosalvo);
             if (caractere != '\n') {
                 matriz_posicao[i][j] = caractere;
