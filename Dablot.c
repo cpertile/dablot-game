@@ -1,4 +1,12 @@
-// Dablot v 0.8.0
+/*
+
+*** --- Dablot v0.8
+*** Universidade Tuiuti do Parana
+*** Programação Estruturada 
+*** Professor: Douglas Koerich
+*** Aluno: Cleberson Pertile
+
+*/
 
 #include <ctype.h>
 #include <stdbool.h>
