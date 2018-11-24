@@ -1,13 +1,14 @@
 /*
 
-*** --- Dablot v0.8
-*** Universidade Tuiuti do Parana
-*** Programação Estruturada 
-*** Professor: Douglas Koerich
-*** Aluno: Cleberson Pertile
+@@@ | Dablot v0.8
+@@@ | Universidade Tuiuti do Parana
+@@@ | Programação Estruturada 
+@@@ | Professor: Douglas Koerich
+@@@ | Aluno: Cleberson Pertile
 
 */
 
+// Bibliotecas
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -17,6 +18,7 @@
 #include <unistd.h>
 #include "pontoCardeal.h"
 
+// Indicadores de tamanho
 #define TAM_X_TAB 11
 #define TAM_Y_TAB 13
 #define TAM_VETOR 30
@@ -26,6 +28,7 @@
 #define LIM_ESQUERDO 0
 #define LIM_DIREITO 10
 
+// Indicadores de cor
 #define AMRL "\x1B[33m"
 #define AZUL "\x1B[34m"
 #define BNCO "\x1B[37m"
@@ -36,6 +39,7 @@
 #define VRML "\x1B[91m"
 #define RST  "\x1B[0m"
 
+// Prototipagem
 bool validar_alcance(const int[*], size_t, size_t, const char[*][*], pontoCardeal*, pontoCardeal*);
 bool validar_destino(const int[*], const int[*], size_t, size_t, char[*][*], pontoCardeal, pontoCardeal, char[*], char[*]);
 bool validar_peca(const int*, const int[*], size_t, size_t, const char[*][*]);
@@ -59,6 +63,7 @@ void reiniciar_partida(size_t, size_t, char[*][*], char[*], char[*], size_t);
 void trocar_turno(int*);
 void tutorial(void);
 
+// Jogo
 int main(void) {
     // Variáveis gerais de funcionamento
     bool game = false;
@@ -81,18 +86,23 @@ int main(void) {
     // Chamada do menu inicial para início do jogo
     char escolha = menu_inicial();
     switch(escolha) {
+    	// Abre o tutorial 'Aprenda a Jogar' e após será iniciado novo jogo
         case 'A': tutorial(); escolha = 'N';
+
         case 'C':
         case 'N':
-            if (escolha == 'C') {
+            if (escolha == 'C') { // 
                 carregar_jogo(TAM_X_TAB, TAM_Y_TAB, matriz_posicao, nome_jogador1, pecas_jog1, nome_jogador2, pecas_jog2, &jog_atual, &game);
             } else {
                 comecar_jogo(nome_jogador1, nome_jogador2, &game);
                 jog_atual = sortear_jogador();
             }
+
+            // Início de jogo ou novo turno
             while (game) {
                 imprimir_tabuleiro(TAM_X_TAB, TAM_Y_TAB, matriz_posicao);
 
+                // Verifica se acabaram as peças do jogador atual
                 if (!verificar_vetor_pecas(pecas_jog1, pecas_jog2, TAM_VETOR, &jog_atual)) {
                     if (jog_atual == 1) {
                         printf(VRML "%s" CNZA ", todas as suas pecas foram eliminadas! Voce perdeu...\n", nome_jogador1);
@@ -105,6 +115,7 @@ int main(void) {
                     game = false; break;
                 }
 
+                // Verifica se o jogador atual está trancado pelo adversário
                 if (!verificar_pecas_livres(TAM_X_TAB, TAM_Y_TAB, matriz_posicao, &jog_atual, peca, &movimento, &captura)) {
                     if (jog_atual == 1) {
                         printf(VRML "%s" CNZA ", suas pecas estao todas sem movimento! Voce perdeu...\n", nome_jogador1);
@@ -117,33 +128,40 @@ int main(void) {
                     game = false; break;
                 }
 
+                // Verifica se o jogador atual deseja desistir do jogo caso tenha perdido sua peça mais forte ('R' ou 'F)
                 if (verificar_desistencia(jog_atual, nome_jogador1, nome_jogador2, TAM_NOME, pecas_jog1, pecas_jog2, TAM_VETOR)) {
                     puts("Por desistência, jogo encerrado...");
                     game = false; break;
                 }
 
+                // Pede uma entrada ao jogador, que pode ser um comando para abrir o menu de pausa ou a coordenada de uma peça para mover
                 if (!pedir_entrada(&jog_atual, peca, nome_jogador1, nome_jogador2)) {
+
+                	// Menu de pausa
                     switch(menu_pausa()) {
                         case 'V': continue;
                         case 'C': carregar_jogo(TAM_X_TAB, TAM_Y_TAB, matriz_posicao, nome_jogador1, pecas_jog1, nome_jogador2, pecas_jog2, &jog_atual, &game); continue;
                         case 'S': salvar_jogo(TAM_X_TAB, TAM_Y_TAB, matriz_posicao, nome_jogador1, pecas_jog1, nome_jogador2, pecas_jog2, &jog_atual); continue;
                         case 'R': reiniciar_partida(TAM_X_TAB, TAM_Y_TAB, matriz_posicao, pecas_jog1, pecas_jog2, TAM_VETOR); jog_atual = sortear_jogador(); continue;
                         case 'X': reiniciar_partida(TAM_X_TAB, TAM_Y_TAB, matriz_posicao, pecas_jog1, pecas_jog2, TAM_VETOR); jog_atual = sortear_jogador();
-                        comecar_jogo(nome_jogador1, nome_jogador2, &game); continue;
+                        	comecar_jogo(nome_jogador1, nome_jogador2, &game); continue;
                         case '0': game = false; continue;
                     }
                 }
 
+                // Valida a peça escolhida, se estiver trancada, avisa o jogador
                 if (!validar_peca(&jog_atual, peca, TAM_X_TAB, TAM_Y_TAB, matriz_posicao)) continue;
-
                 if (!validar_alcance(peca, TAM_X_TAB, TAM_Y_TAB, matriz_posicao, &movimento, &captura)) {
                     puts("Essa peca nao pode se mover, tente outra...");
                     sleep(2);
                     continue;
                 }
 
+                // Solicita e valida a coordenada de destino enviada pelo jogador atual
                 pedir_destino(dest);
                 if (!validar_destino(peca, dest, TAM_X_TAB, TAM_Y_TAB, matriz_posicao, movimento, captura, pecas_jog1, pecas_jog2)) continue;
+
+                // Estando tudo OK, faz a jogada e troca o turno
                 fazer_jogada(TAM_X_TAB, TAM_Y_TAB, matriz_posicao, peca, dest);
                 trocar_turno(&jog_atual);
             }
@@ -617,6 +635,7 @@ void imprimir_tabuleiro(size_t tam_x, size_t tam_y, const char T[tam_x][tam_y]) 
 }
 
 int pedir_entrada(const int *jog_atual, int peca[], char nome_jogador1[], char nome_jogador2[]) {
+	// Essa função traduz o que o jogador digita para os índices daquele caracter na matriz
     // coord_x_l = coordenada na forma letra, depois traduzida para forma número
     const int x = 0, y = 1;
     char coord_x_l;
@@ -718,7 +737,7 @@ bool validar_alcance(const int peca[], size_t tam_x, size_t tam_y, const char ma
     // Peças em linhas pares têm 8 posições de movimento e de captura
     // Peças em linhas ímpares têm 4 posições de movimento e de captura
 
-    // Posições cardeais de movimento
+    // Posições cardeais de movimento (inicializadas em 0)
     movimento->N[x] = peca[x]; movimento->N[y] = (peca[y] - 2);
     movimento->S[x] = peca[x]; movimento->S[y] = (peca[y] + 2);
     movimento->E[x] = (peca[x] + 2); movimento->E[y] = peca[y];
@@ -729,7 +748,7 @@ bool validar_alcance(const int peca[], size_t tam_x, size_t tam_y, const char ma
     movimento->NO[x] = (peca[x] - 1); movimento->NO[y] = (peca[y] - 1);
     movimento->iN = 0, movimento->iS = 0, movimento->iE = 0, movimento->iO = 0, movimento->iNE = 0, movimento->iSE = 0, movimento->iSO = 0, movimento->iNO = 0;
 
-    // Posições cardeais de captura
+    // Posições cardeais de captura (inicializadas em 0)
     captura->N[x] = peca[x]; captura->N[y] = (peca[y] - 4);
     captura->S[x] = peca[x]; captura->S[y] = (peca[y] + 4);
     captura->E[x] = (peca[x] + 4); captura->E[y] = peca[y];
@@ -740,8 +759,9 @@ bool validar_alcance(const int peca[], size_t tam_x, size_t tam_y, const char ma
     captura->NO[x] = (peca[x] - 2); captura->NO[y] = (peca[y] - 2);
     captura->iN = 0, captura->iS = 0, captura->iE = 0, captura->iO = 0, captura->iNE = 0, captura->iSE = 0, captura->iSO = 0, captura->iNO = 0;
 
-    // 1ª Parte: validar se as posições cardeais de movimento estão dentro do tabuleiro e se possuem um espaço
-    // Se o conteúdo não for um espaço, verificar se é uma inimiga. Se for, registrar -1 na posição
+    // 1ª Parte: validar se as posições cardeais de movimento estão dentro do tabuleiro e se possuem um espaço. Se for, registrar 1 na posição.
+    // Se o conteúdo não for um espaço, verificar se é uma inimiga. Se for inimiga que possa capturar, registrar -1 na posição.
+    // Ou seja: 1 = movimento possível / 0 = movimento impossível / -1 = captura possível.
     // Linhas de índice par = todas as coordenadas (N, S, E, O, NE, SE, SO e NO)
     // Linhas de índice ímpar = apenas as coordenadas subcardeais (NE, SE, SO e NO)
     // Jogador 1 verificar se { F, f, c }
@@ -1160,9 +1180,8 @@ bool validar_alcance(const int peca[], size_t tam_x, size_t tam_y, const char ma
     }
 
     // 2ª Parte: validar se as posições de captura estão disponíveis, caso sejam necessárias
-    // Se registrar -1 em alguma posição cardeal, verificar posição de captura correspondente:
-        // Se tiver um espaço, habilitar (true)
-        // Se não tiver espaço, desabilitar (false)
+    // Se registrado -1 em alguma posição cardeal de movimento, verificar posição de captura correspondente
+    // Se tiver um espaço, habilitar (1)
 
     if (peca[y] % 2 == 0) {
         if ((movimento->iN == -1) && (captura->N[y] >= LIM_SUPERIOR) && (matriz_posicao[captura->N[x]][captura->N[y]] == ' ')) captura->iN = 1;
@@ -1231,27 +1250,16 @@ bool validar_destino(const int peca[], const int dest[], size_t tam_x, size_t ta
     // Retornar 0 para destino inválido, 1 para movimento normal, 2 para movimento de captura
     // 1ª parte: validar se o destino está dentro do tabuleiro. Se não estiver, retornar false
     // Princípio Coluna par Linha par / Coluna ímpar linha ímpar
-
-    if ((dest[x] < LIM_ESQUERDO) || (dest[x] > LIM_DIREITO) || (dest[y] < LIM_SUPERIOR) || (dest[y] > LIM_INFERIOR)) {
+    if ((dest[x] < LIM_ESQUERDO) || (dest[x] > LIM_DIREITO) || (dest[y] < LIM_SUPERIOR) || (dest[y] > LIM_INFERIOR)
+    	|| ((dest[x] % 2 == 0) && (dest[y] % 2 == 1)) || ((dest[x] % 2 == 1) && (dest[y] % 2 == 0))) {
         puts("Voce escolheu um destino invalido, tente novamente...");
         sleep(2);
         return false;
     }
 
-    if ((dest[x] % 2 == 0) && (dest[y] % 2 == 1)) {
-        puts("Voce escolheu um destino invalido, tente novamente...");
-        sleep(2);
-        return false;
-    }
-
-    if ((dest[x] % 2 == 1) && (dest[y] % 2 == 0)) {
-        puts("Voce escolheu um destino invalido, tente novamente...");
-        sleep(2);
-        return false;
-    }
     // 2ª Parte: validar se o destino não é igual à pelo menos uma das posições de movimento cardeal
     // Se não for de nenhuma coordenada de movimento cardeal, validar se é alguma coordenada de captura
-    // Para ser uma captura válida, a cardeal de movimento == -1 e a cardeal de captura == 1
+    // Para ser uma captura válida, a cardeal de movimento deve ser -1 e a cardeal de captura deve ser 1
     // Se for captura válida, chamar a função capturar_peca(<posição movimento cardeal equivalente>)
     if (peca[y] % 2 == 0) {
         if ((((dest[x] == movimento.N[x]) && (dest[y] == movimento.N[y]) && (movimento.iN == 1)))
@@ -1336,9 +1344,8 @@ bool validar_destino(const int peca[], const int dest[], size_t tam_x, size_t ta
 }
 
 void capturar_peca(int coord_peca_capturada[], size_t tam_x, size_t tam_y, char matriz_posicao[tam_x][tam_y], size_t tam_vetor, char pecas_jog1[], char pecas_jog2[]) {
-    // Verifica qual a peça capturada, e coloca um espaço em branco no seu lugar correspondente dentro do vetor de peças do jogador
+    // Verifica qual a peça capturada. Coloca um espaço em branco nos lugares que ocupava no vetor de peças e na matriz
     // Para as peças g e c que se repetem, começa verificando na primeira posição e vai até a 28ª
-
     const int x = 0, y = 1;
     int i;
     switch(matriz_posicao[coord_peca_capturada[x]][coord_peca_capturada[y]]) {
