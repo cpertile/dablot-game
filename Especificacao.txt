@@ -3,10 +3,10 @@
 #-----< Especificação Inicial >-----#
 	- Jogo de tabuleiro para 2 jogadores com 72 interseções disponíveis para as peças
 	
-	- Menu inicial com molduras, nome do jogo, versão, copyrights e créditos
+	- Menu inicial
 		>INICIAR<
-			NOVO JOGO
-			JOGO SALVO
+		NOVO JOGO
+		JOGO SALVO
 		APRENDA A JOGAR
 		SAIR
 
@@ -14,10 +14,7 @@
 		JOGO SALVO: (funcionalidade a ser implementada no futuro)
 		APRENDA A JOGAR: Tutorial com as regras do jogo Dablot e como jogar no programa
 
-// Tabuleiro
-	// Refazer matriz linha por linha com puts() 
-	// Índices serão somente onde pode ter uma peça
-	
+// Tabuleiro	
 	Matriz 11 x 13 com limites [0,0] e [10,12]
 	Os números de fora são os índices da matriz_posicao[][]
 	Os números de dentro são a contagem que aparecem para o usuário na tela
@@ -131,23 +128,3 @@
 	- Capturar todas as peças do oponente
 	- Desistência opcional ao ter sua peça nível 3 capturada durante o jogo
 	- Sem jogadas possíveis
-
-#-----< Código >-----#
-
-// Menu principal
-	// Moldura
-	// Sortear jogador
-
-// Desenhar tabuleiro
-
-// Desenhar peças no tabuleiro
-
-// Escolher peça
-	- Usar teclas WASD para movimentar e Espaço para prosseguir ao próximo estado (escolher interseção onde a peça vai)
-	- Permitir ESC ou outra tecla para voltar ao estado anterior
-
-// Verificar movimento válido
-
-// Verificar se é jogo ou fim de jogo
-
-// Retirar peça do tabuleiro em caso de eliminação
